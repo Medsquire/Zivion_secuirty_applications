@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-page text-text m-0;
+  }
+}
+
+/* Make it look like a mobile app in browser */
+@media (min-width: 640px) {
+  body {
+    @apply flex justify-center items-center min-h-screen bg-gray-200;
+  }
+  #root {
+    @apply w-full max-w-[400px] h-[850px] max-h-screen bg-page shadow-2xl relative overflow-hidden sm:rounded-[40px] sm:border-[8px] sm:border-gray-800;
+  }
+}
+
+#root {
+  @apply h-screen w-full flex flex-col overflow-x-hidden overflow-y-auto;
+}
