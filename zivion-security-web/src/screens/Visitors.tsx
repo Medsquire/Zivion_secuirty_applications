@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { Search, Filter, Clock, CheckCircle2, LogOut, MoreVertical } from 'lucide-react';
+import { Input } from '../components/Input';
+import { Modal } from '../components/Modal';
+import { Search, Filter, Clock, CheckCircle2, LogOut, MoreVertical, Camera, ShieldCheck } from 'lucide-react';
 
 const INITIAL_VISITORS = [
   { id: '1', name: 'John Smith', type: 'Guest', block: 'A', apt: '104', timeIn: '09:15 AM', timeOut: null, status: 'Inside', phone: '+1 234-567-8900', duration: null },
@@ -14,13 +16,26 @@ const INITIAL_VISITORS = [
 export const Visitors = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [visitors, setVisitors] = useState(INITIAL_VISITORS);
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [visitorType, setVisitorType] = useState<'Guest' | 'Delivery'>('Guest');
+  const [visitorStatus, setVisitorStatus] = useState<'form' | 'waiting' | 'approved'>('form');
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    block: '',
+    apt: '',
+    company: ''
+  });
 
   const handleCheckout = (id: string) => {
     setVisitors(prev => prev.map(visitor => {
       if (visitor.id === id) {
         const now = new Date();
         const timeOutStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        // Generate a random mock duration between 15m and 3h
         const mockHrs = Math.floor(Math.random() * 3);
         const mockMins = Math.floor(Math.random() * 45) + 15;
         const durationStr = mockHrs > 0 ? `${mockHrs}h ${mockMins}m` : `${mockMins}m`;
@@ -34,6 +49,44 @@ export const Visitors = () => {
       }
       return visitor;
     }));
+  };
+
+  const handleAddVisitor = (e: React.FormEvent) => {
+    e.preventDefault();
+    setVisitorStatus('waiting');
+    
+    // Simulate resident approval taking 2 seconds
+    setTimeout(() => {
+      setVisitorStatus('approved');
+      
+      // Add to table
+      const now = new Date();
+      const timeInStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const newVisitor = {
+        id: Math.random().toString(),
+        name: formData.name || (visitorType === 'Delivery' ? formData.company : 'Unknown'),
+        type: visitorType,
+        block: formData.block,
+        apt: formData.apt,
+        timeIn: timeInStr,
+        timeOut: null,
+        status: 'Inside',
+        phone: formData.phone || '-',
+        duration: null
+      };
+
+      setVisitors(prev => [newVisitor, ...prev]);
+
+      // Auto close after 1.5 seconds of approval
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setTimeout(() => {
+          setVisitorStatus('form');
+          setFormData({ name: '', phone: '', block: '', apt: '', company: '' }); // Reset form
+        }, 300);
+      }, 1500);
+    }, 2000);
   };
 
   const getStatusBadge = (status: string) => {
@@ -67,7 +120,9 @@ export const Visitors = () => {
           <h1 className="text-2xl font-bold text-navy">Visitor Log</h1>
           <p className="text-secondary text-sm mt-1">Manage and track all guests and deliveries</p>
         </div>
-        <Button className="w-auto px-6 whitespace-nowrap">New Visitor Entry</Button>
+        <Button className="w-auto px-6 whitespace-nowrap" onClick={() => setIsModalOpen(true)}>
+          New Visitor Entry
+        </Button>
       </div>
 
       <Card className="p-0 overflow-hidden">
@@ -145,16 +200,124 @@ export const Visitors = () => {
             </tbody>
           </table>
         </div>
-        
-        {/* Pagination placeholder */}
-        <div className="p-4 border-t border-border flex justify-between items-center text-sm text-secondary bg-gray-50/50">
-          <span>Showing 1 to {filteredVisitors.length} of 24 entries</span>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-border rounded hover:bg-gray-100 disabled:opacity-50" disabled>Prev</button>
-            <button className="px-3 py-1 border border-border rounded hover:bg-gray-100">Next</button>
-          </div>
-        </div>
       </Card>
+
+      {/* New Visitor Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Visitor Entry">
+        {visitorStatus === 'form' && (
+          <div className="animate-in fade-in">
+            <div className="flex bg-page p-1 rounded-xl mb-6">
+              <button 
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${visitorType === 'Guest' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
+                onClick={() => setVisitorType('Guest')}
+              >
+                Guest / People
+              </button>
+              <button 
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${visitorType === 'Delivery' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
+                onClick={() => setVisitorType('Delivery')}
+              >
+                Delivery
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddVisitor}>
+              <div className="flex flex-col items-center mb-5">
+                <button 
+                  type="button" 
+                  className="w-20 h-20 bg-page border-2 border-dashed border-border rounded-full flex flex-col items-center justify-center text-secondary hover:text-[#1D4ED8] hover:border-[#1D4ED8] hover:bg-[#1D4ED8]/5 transition-colors relative overflow-hidden"
+                >
+                  <Camera size={24} className="mb-1" />
+                  <span className="text-[10px] font-medium">Add Photo</span>
+                </button>
+              </div>
+              <Input 
+                label="Full Name" 
+                placeholder={visitorType === 'Guest' ? "e.g. John Smith" : "e.g. Amazon Rider"} 
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required 
+              />
+              <Input 
+                label="Phone Number" 
+                placeholder="e.g. +1 234 567 8900" 
+                type="tel" 
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                required={visitorType === 'Guest'} 
+              />
+              
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="block text-[13px] font-medium text-navy mb-1.5">Block</label>
+                  <select 
+                    className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-[#1D4ED8] transition-all" 
+                    required 
+                    value={formData.block}
+                    onChange={(e) => setFormData({...formData, block: e.target.value})}
+                  >
+                    <option value="" disabled>Select Block</option>
+                    <option value="A">Block A</option>
+                    <option value="B">Block B</option>
+                    <option value="C">Block C</option>
+                    <option value="D">Block D</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-medium text-navy mb-1.5">Apartment</label>
+                  <select 
+                    className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-[#1D4ED8] transition-all" 
+                    required 
+                    value={formData.apt}
+                    onChange={(e) => setFormData({...formData, apt: e.target.value})}
+                  >
+                    <option value="" disabled>Select Flat</option>
+                    <option value="101">101</option>
+                    <option value="102">102</option>
+                    <option value="201">201</option>
+                    <option value="202">202</option>
+                    <option value="301">301</option>
+                    <option value="302">302</option>
+                    <option value="405">405</option>
+                    <option value="505">505</option>
+                  </select>
+                </div>
+              </div>
+
+              {visitorType === 'Delivery' && (
+                <Input 
+                  label="Company / Service" 
+                  placeholder="e.g. Amazon, Swiggy, Uber" 
+                  value={formData.company}
+                  onChange={(e) => setFormData({...formData, company: e.target.value})}
+                  required 
+                />
+              )}
+              <Button type="submit" className="mt-4">Send Approval Request</Button>
+            </form>
+          </div>
+        )}
+
+        {visitorStatus === 'waiting' && (
+          <div className="flex flex-col items-center py-10 animate-in fade-in">
+            <Clock size={48} className="text-warning animate-spin mb-4" />
+            <h3 className="text-lg font-bold text-navy mb-2">Waiting for Approval</h3>
+            <p className="text-sm text-secondary text-center px-6">
+              Request sent to resident. Please wait.
+            </p>
+          </div>
+        )}
+
+        {visitorStatus === 'approved' && (
+          <div className="flex flex-col items-center py-10 animate-in zoom-in-50">
+            <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4 border border-success/20 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+              <ShieldCheck size={40} className="text-success" />
+            </div>
+            <h3 className="text-[22px] font-bold text-success mb-2">Request Approved!</h3>
+          </div>
+        )}
+      </Modal>
+
     </div>
   );
 };

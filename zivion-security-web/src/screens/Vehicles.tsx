@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { Search, Filter, Clock, CheckCircle2, MoreVertical, LogOut } from 'lucide-react';
+import { Input } from '../components/Input';
+import { Modal } from '../components/Modal';
+import { Search, Filter, Clock, CheckCircle2, MoreVertical, LogOut, ShieldCheck } from 'lucide-react';
 
 const INITIAL_VEHICLES = [
   { id: '1', plate: 'KA01-AB-1234', type: 'Resident', owner: 'John Smith', block: 'A', apt: '104', timeIn: 'Resident', timeOut: null, status: 'Parked', duration: null },
@@ -13,6 +15,19 @@ const INITIAL_VEHICLES = [
 export const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [vehicles, setVehicles] = useState(INITIAL_VEHICLES);
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [vehicleMode, setVehicleMode] = useState<'in' | 'out'>('in');
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    plate: '',
+    owner: '',
+    block: '',
+    apt: ''
+  });
 
   const handleCheckout = (id: string) => {
     setVehicles(prev => prev.map(vehicle => {
@@ -32,6 +47,51 @@ export const Vehicles = () => {
       }
       return vehicle;
     }));
+  };
+
+  const handleAddVehicle = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSuccess(true);
+    
+    setTimeout(() => {
+      // If logging check-in, add it to the table
+      if (vehicleMode === 'in') {
+        const now = new Date();
+        const timeInStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Determine type based on owner/plate logic
+        let type = 'Guest';
+        if (formData.owner.toLowerCase().includes('amazon') || formData.owner.toLowerCase().includes('delivery')) type = 'Delivery';
+        if (formData.owner.toLowerCase().includes('plumber') || formData.owner.toLowerCase().includes('service')) type = 'Service';
+
+        const newVehicle = {
+          id: Math.random().toString(),
+          plate: formData.plate.toUpperCase(),
+          type: type,
+          owner: formData.owner || 'Unknown',
+          block: formData.block,
+          apt: formData.apt,
+          timeIn: timeInStr,
+          timeOut: null,
+          status: 'Inside',
+          duration: null
+        };
+        
+        setVehicles(prev => [newVehicle, ...prev]);
+      } else {
+        // If logging check-out by plate number, find it and check it out
+        const existingVehicle = vehicles.find(v => v.plate.toLowerCase() === formData.plate.toLowerCase() && v.status !== 'Exited');
+        if (existingVehicle) {
+          handleCheckout(existingVehicle.id);
+        }
+      }
+
+      setIsModalOpen(false);
+      setTimeout(() => {
+        setIsSuccess(false);
+        setFormData({ plate: '', owner: '', block: '', apt: '' });
+      }, 300);
+    }, 1500);
   };
 
   const getStatusBadge = (status: string) => {
@@ -74,7 +134,9 @@ export const Vehicles = () => {
           <h1 className="text-2xl font-bold text-navy">Vehicle Log</h1>
           <p className="text-secondary text-sm mt-1">Track all vehicles entering and exiting the premises</p>
         </div>
-        <Button className="w-auto px-6 whitespace-nowrap">Log New Vehicle</Button>
+        <Button className="w-auto px-6 whitespace-nowrap" onClick={() => setIsModalOpen(true)}>
+          Log New Vehicle
+        </Button>
       </div>
 
       <Card className="p-0 overflow-hidden">
@@ -155,16 +217,98 @@ export const Vehicles = () => {
             </tbody>
           </table>
         </div>
-        
-        {/* Pagination placeholder */}
-        <div className="p-4 border-t border-border flex justify-between items-center text-sm text-secondary bg-gray-50/50">
-          <span>Showing 1 to {filteredVehicles.length} of 42 entries</span>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-border rounded hover:bg-gray-100 disabled:opacity-50" disabled>Prev</button>
-            <button className="px-3 py-1 border border-border rounded hover:bg-gray-100">Next</button>
-          </div>
-        </div>
       </Card>
+
+      {/* New Vehicle Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Vehicle Log">
+        {isSuccess ? (
+          <div className="flex flex-col items-center py-8 animate-in zoom-in-50">
+            <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
+              <CheckCircle2 size={32} className="text-success" />
+            </div>
+            <h3 className="text-xl font-bold text-navy mb-2">Success!</h3>
+            <p className="text-sm text-secondary text-center">Vehicle successfully checked {vehicleMode}.</p>
+          </div>
+        ) : (
+          <div>
+             <div className="flex bg-page p-1 rounded-xl mb-6">
+              <button 
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${vehicleMode === 'in' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
+                onClick={() => setVehicleMode('in')}
+              >
+                Check In
+              </button>
+              <button 
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${vehicleMode === 'out' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
+                onClick={() => setVehicleMode('out')}
+              >
+                Check Out
+              </button>
+            </div>
+            <form onSubmit={handleAddVehicle} className="animate-in fade-in">
+              <Input 
+                label="License Plate Number" 
+                placeholder="e.g. KA01-AB-1234" 
+                value={formData.plate}
+                onChange={(e) => setFormData({...formData, plate: e.target.value})}
+                required 
+              />
+              {vehicleMode === 'in' && (
+                <>
+                  <Input 
+                    label="Driver Name / Company" 
+                    placeholder="e.g. John Doe, Amazon" 
+                    value={formData.owner}
+                    onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                    required
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                      <label className="block text-[13px] font-medium text-navy mb-1.5">Block</label>
+                      <select 
+                        className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-[#1D4ED8] transition-all" 
+                        required 
+                        value={formData.block}
+                        onChange={(e) => setFormData({...formData, block: e.target.value})}
+                      >
+                        <option value="" disabled>Select Block</option>
+                        <option value="A">Block A</option>
+                        <option value="B">Block B</option>
+                        <option value="C">Block C</option>
+                        <option value="D">Block D</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[13px] font-medium text-navy mb-1.5">Apartment</label>
+                      <select 
+                        className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-[#1D4ED8] transition-all" 
+                        required 
+                        value={formData.apt}
+                        onChange={(e) => setFormData({...formData, apt: e.target.value})}
+                      >
+                        <option value="" disabled>Select Flat</option>
+                        <option value="101">101</option>
+                        <option value="102">102</option>
+                        <option value="201">201</option>
+                        <option value="202">202</option>
+                        <option value="301">301</option>
+                        <option value="302">302</option>
+                        <option value="405">405</option>
+                        <option value="505">505</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+              <Button type="submit" className="mt-4">
+                {vehicleMode === 'in' ? 'Log Vehicle Check In' : 'Log Vehicle Check Out'}
+              </Button>
+            </form>
+          </div>
+        )}
+      </Modal>
+
     </div>
   );
 };
