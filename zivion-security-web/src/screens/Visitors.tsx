@@ -89,8 +89,8 @@ export const Visitors = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
+        <div className="w-full overflow-x-auto scroll-smooth pb-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
             <thead className="bg-page text-secondary font-semibold border-b border-border">
               <tr>
                 <th className="px-6 py-4">Visitor Info</th>
