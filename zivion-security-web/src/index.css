@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-page text-text m-0;
+  }
+}
+
+#root {
+  @apply min-h-screen w-full flex flex-col overflow-x-hidden;
+}
