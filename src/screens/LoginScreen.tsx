@@ -23,17 +23,23 @@ import {
   ArrowRight,
   ShieldCheck,
   UserCheck,
-  Building,
+  AlertCircle,
 } from 'lucide-react-native';
 import { colors, gradients } from '../theme/colors';
 
 interface LoginScreenProps {
   navigation: {
-    navigate: (screen: 'GuardDashboard' | 'SupervisorDashboard' | 'AdminDashboard') => void;
+    navigate: (screen: 'GuardDashboard' | 'SupervisorDashboard') => void;
   };
 }
 
-type RoleType = 'guard' | 'supervisor' | 'admin';
+type RoleType = 'guard' | 'supervisor';
+
+// Registered phone numbers mapping
+const KNOWN_ACCOUNTS: Record<string, { role: RoleType; name: string; pass: string }> = {
+  '9876543210': { role: 'guard', name: 'Security Guard', pass: 'guard123' },
+  '9876543211': { role: 'supervisor', name: 'Shift Supervisor', pass: 'super123' },
+};
 
 const buildingImage =
   'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80';
@@ -42,41 +48,60 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const { width } = useWindowDimensions();
   const isWideScreen = width >= 900;
 
-  const [role, setRole] = useState<RoleType>('guard');
   const [phoneNumber, setPhoneNumber] = useState('9876543210');
-  const [password, setPassword] = useState('password123');
+  const [password, setPassword] = useState('guard123');
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleRoleSelect = (selectedRole: RoleType) => {
-    setRole(selectedRole);
-    if (selectedRole === 'guard') {
+  // Automatically determine role based on phone number
+  const detectedAccount = KNOWN_ACCOUNTS[phoneNumber];
+  // If registered, use registered role; otherwise determine by rule or default to guard
+  const detectedRole: RoleType = detectedAccount
+    ? detectedAccount.role
+    : phoneNumber.endsWith('1')
+    ? 'supervisor'
+    : 'guard';
+
+  const handlePhoneChange = (text: string) => {
+    // Keep only digits, max 10
+    const cleaned = text.replace(/[^0-9]/g, '').slice(0, 10);
+    setPhoneNumber(cleaned);
+    setErrorMessage('');
+
+    // If matches a known demo number, auto-set default password for convenience
+    if (KNOWN_ACCOUNTS[cleaned]) {
+      setPassword(KNOWN_ACCOUNTS[cleaned].pass);
+    }
+  };
+
+  const fillQuickLogin = (role: RoleType) => {
+    if (role === 'guard') {
       setPhoneNumber('9876543210');
       setPassword('guard123');
-    } else if (selectedRole === 'supervisor') {
+    } else {
       setPhoneNumber('9876543211');
       setPassword('super123');
-    } else {
-      setPhoneNumber('9876543212');
-      setPassword('admin123');
     }
+    setErrorMessage('');
   };
 
   const handleLogin = () => {
-    if (role === 'guard') {
-      navigation.navigate('GuardDashboard');
-    } else if (role === 'supervisor') {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      setErrorMessage('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Please enter your password');
+      return;
+    }
+
+    setErrorMessage('');
+    if (detectedRole === 'supervisor') {
       navigation.navigate('SupervisorDashboard');
     } else {
-      navigation.navigate('AdminDashboard');
+      navigation.navigate('GuardDashboard');
     }
   };
-
-  const roleLabel =
-    role === 'guard'
-      ? 'Security Guard'
-      : role === 'supervisor'
-      ? 'Supervisor'
-      : 'Administrator';
 
   return (
     <KeyboardAvoidingView
@@ -116,7 +141,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 </LinearGradient>
                 <View>
                   <Text style={styles.brandTitle}>ZIVION SECURITY</Text>
-                  <Text style={styles.brandSubtitle}>Gate & Access Management</Text>
+                  <Text style={styles.brandSubtitle}>Gate & Checkpoint Terminal</Text>
                 </View>
               </View>
             </View>
@@ -130,66 +155,101 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <View style={styles.handle} />
           </View>
 
-          {/* Minimal Title */}
+          {/* Title */}
           <Text style={styles.formTitle}>Sign In</Text>
-          <Text style={styles.formSubtitle}>Enter your phone number & password to continue</Text>
+          <Text style={styles.formSubtitle}>
+            Role is automatically verified from your mobile number
+          </Text>
 
-          {/* Compact Role Selector */}
-          <View style={styles.roleTabsContainer}>
-            <TouchableOpacity
-              style={[styles.roleTab, role === 'guard' && styles.activeRoleTab]}
-              onPress={() => handleRoleSelect('guard')}
-              activeOpacity={0.8}
-            >
-              <ShieldCheck
-                size={16}
-                color={role === 'guard' ? '#2563EB' : colors.secondaryText}
-              />
-              <Text
-                style={[styles.roleTabText, role === 'guard' && styles.activeRoleTabText]}
+          {/* Quick Demo Logins Selector */}
+          <View style={styles.quickLoginsSection}>
+            <Text style={styles.quickLoginsLabel}>QUICK LOGINS:</Text>
+            <View style={styles.quickLoginsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.quickLoginChip,
+                  detectedRole === 'guard' && styles.activeGuardChip,
+                ]}
+                onPress={() => fillQuickLogin('guard')}
+                activeOpacity={0.8}
               >
-                Guard
-              </Text>
-            </TouchableOpacity>
+                <ShieldCheck
+                  size={15}
+                  color={detectedRole === 'guard' ? '#2563EB' : '#64748B'}
+                />
+                <Text
+                  style={[
+                    styles.quickLoginChipText,
+                    detectedRole === 'guard' && styles.activeGuardChipText,
+                  ]}
+                >
+                  Guard (9876543210)
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.roleTab, role === 'supervisor' && styles.activeRoleTab]}
-              onPress={() => handleRoleSelect('supervisor')}
-              activeOpacity={0.8}
-            >
-              <UserCheck
-                size={16}
-                color={role === 'supervisor' ? '#2563EB' : colors.secondaryText}
-              />
-              <Text
-                style={[styles.roleTabText, role === 'supervisor' && styles.activeRoleTabText]}
+              <TouchableOpacity
+                style={[
+                  styles.quickLoginChip,
+                  detectedRole === 'supervisor' && styles.activeSupervisorChip,
+                ]}
+                onPress={() => fillQuickLogin('supervisor')}
+                activeOpacity={0.8}
               >
-                Supervisor
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.roleTab, role === 'admin' && styles.activeRoleTab]}
-              onPress={() => handleRoleSelect('admin')}
-              activeOpacity={0.8}
-            >
-              <Building
-                size={16}
-                color={role === 'admin' ? '#2563EB' : colors.secondaryText}
-              />
-              <Text
-                style={[styles.roleTabText, role === 'admin' && styles.activeRoleTabText]}
-              >
-                Admin
-              </Text>
-            </TouchableOpacity>
+                <UserCheck
+                  size={15}
+                  color={detectedRole === 'supervisor' ? '#4F46E5' : '#64748B'}
+                />
+                <Text
+                  style={[
+                    styles.quickLoginChipText,
+                    detectedRole === 'supervisor' && styles.activeSupervisorChipText,
+                  ]}
+                >
+                  Supervisor (9876543211)
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Form Inputs */}
           <View style={styles.inputsSection}>
-            {/* Phone Number Field */}
+            {/* Phone Number Field (Marked required with *) */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Phone Number</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.fieldLabel}>
+                  Phone Number <Text style={styles.requiredMark}>*</Text>
+                </Text>
+                {/* Dynamically Detected Role Badge */}
+                {phoneNumber.length >= 10 && (
+                  <View
+                    style={[
+                      styles.detectedBadge,
+                      detectedRole === 'supervisor'
+                        ? styles.supervisorBadge
+                        : styles.guardBadge,
+                    ]}
+                  >
+                    {detectedRole === 'supervisor' ? (
+                      <UserCheck size={12} color="#4F46E5" />
+                    ) : (
+                      <ShieldCheck size={12} color="#2563EB" />
+                    )}
+                    <Text
+                      style={[
+                        styles.detectedBadgeText,
+                        detectedRole === 'supervisor'
+                          ? styles.supervisorBadgeText
+                          : styles.guardBadgeText,
+                      ]}
+                    >
+                      {detectedRole === 'supervisor'
+                        ? 'Supervisor Account'
+                        : 'Guard Account'}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
               <View style={styles.inputContainer}>
                 <View style={styles.countryCodeBox}>
                   <Phone size={18} color="#64748B" />
@@ -199,8 +259,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 <TextInput
                   style={styles.textInput}
                   value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  placeholder="Enter phone number"
+                  onChangeText={handlePhoneChange}
+                  placeholder="Enter 10-digit mobile number"
                   placeholderTextColor="#94A3B8"
                   keyboardType="phone-pad"
                   maxLength={10}
@@ -208,9 +268,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Password Field */}
+            {/* Password Field (Marked required with *) */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>Password</Text>
+              <Text style={styles.fieldLabel}>
+                Password <Text style={styles.requiredMark}>*</Text>
+              </Text>
               <View style={styles.inputContainer}>
                 <View style={styles.inputIconBox}>
                   <Lock size={18} color="#64748B" />
@@ -218,7 +280,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 <TextInput
                   style={styles.textInput}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(val) => {
+                    setPassword(val);
+                    setErrorMessage('');
+                  }}
                   placeholder="Enter password"
                   placeholderTextColor="#94A3B8"
                   secureTextEntry={!showPassword}
@@ -237,24 +302,38 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               </View>
             </View>
 
+            {/* Error Message */}
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <AlertCircle size={15} color="#EF4444" />
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+
             {/* Forgot Password Link */}
             <TouchableOpacity style={styles.forgotRow} activeOpacity={0.7}>
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
 
-            {/* Login Button */}
+            {/* Dynamic Login Button based on detected role */}
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={handleLogin}
               style={styles.loginButtonWrapper}
             >
               <LinearGradient
-                colors={['#2563EB', '#0EA5E9']}
+                colors={
+                  detectedRole === 'supervisor'
+                    ? ['#4F46E5', '#06B6D4']
+                    : ['#2563EB', '#0EA5E9']
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.loginButtonGradient}
               >
-                <Text style={styles.loginButtonText}>Sign In as {roleLabel}</Text>
+                <Text style={styles.loginButtonText}>
+                  Login as {detectedRole === 'supervisor' ? 'Supervisor' : 'Security Guard'}
+                </Text>
                 <View style={styles.loginButtonArrow}>
                   <ArrowRight size={18} color="#FFFFFF" />
                 </View>
@@ -266,7 +345,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.footer}>
             <View style={styles.secureBadge}>
               <Lock size={12} color="#94A3B8" />
-              <Text style={styles.secureBadgeText}>End-to-End Encrypted Terminal</Text>
+              <Text style={styles.secureBadgeText}>Encrypted Gate Terminal Access</Text>
             </View>
             <Text style={styles.footerCopy}>ZIVION Security · 24/7 Access</Text>
           </View>
@@ -299,7 +378,7 @@ const styles = StyleSheet.create({
   // Hero Banner (Top)
   heroBanner: {
     width: '100%',
-    height: 220,
+    height: 210,
     justifyContent: 'flex-end',
   },
   wideHeroBanner: {
@@ -321,7 +400,7 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     paddingHorizontal: 24,
-    paddingBottom: 36,
+    paddingBottom: 34,
   },
   brandBadge: {
     flexDirection: 'row',
@@ -378,7 +457,7 @@ const styles = StyleSheet.create({
   handleContainer: {
     alignItems: 'center',
     paddingVertical: 8,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   handle: {
     width: 40,
@@ -395,57 +474,108 @@ const styles = StyleSheet.create({
   formSubtitle: {
     fontSize: 13,
     color: '#64748B',
-    marginTop: 4,
-    marginBottom: 18,
+    marginTop: 3,
+    marginBottom: 16,
   },
 
-  // Role Switcher Tabs
-  roleTabsContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    padding: 4,
-    gap: 4,
-    marginBottom: 20,
+  // Quick Logins
+  quickLoginsSection: {
+    marginBottom: 18,
   },
-  roleTab: {
+  quickLoginsLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  quickLoginsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  quickLoginChip: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 9,
-    borderRadius: 9,
-    gap: 6,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    gap: 5,
   },
-  activeRoleTab: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+  activeGuardChip: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
   },
-  roleTabText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  activeRoleTabText: {
+  activeGuardChipText: {
     color: '#2563EB',
     fontWeight: '700',
+  },
+  activeSupervisorChip: {
+    backgroundColor: '#EEF2FF',
+    borderColor: '#C7D2FE',
+  },
+  activeSupervisorChipText: {
+    color: '#4F46E5',
+    fontWeight: '700',
+  },
+  quickLoginChipText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#475569',
   },
 
   // Inputs
   inputsSection: {
-    gap: 16,
+    gap: 14,
   },
   fieldGroup: {
     gap: 6,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   fieldLabel: {
     fontSize: 13,
     fontWeight: '700',
     color: '#334155',
+  },
+  requiredMark: {
+    color: '#EF4444',
+    fontWeight: '700',
+  },
+  detectedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    gap: 4,
+  },
+  guardBadge: {
+    backgroundColor: '#EFF6FF',
+  },
+  guardBadgeText: {
+    color: '#2563EB',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  supervisorBadge: {
+    backgroundColor: '#EEF2FF',
+  },
+  supervisorBadgeText: {
+    color: '#4F46E5',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  detectedBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -454,7 +584,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     borderRadius: 14,
-    height: 52,
+    height: 50,
     paddingHorizontal: 14,
   },
   countryCodeBox: {
@@ -487,12 +617,28 @@ const styles = StyleSheet.create({
   eyeButton: {
     padding: 6,
   },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    gap: 6,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '500',
+  },
   forgotRow: {
     alignSelf: 'flex-end',
-    marginTop: -4,
+    marginTop: -2,
   },
   forgotText: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '600',
     color: '#2563EB',
   },
@@ -501,7 +647,7 @@ const styles = StyleSheet.create({
   loginButtonWrapper: {
     borderRadius: 14,
     overflow: 'hidden',
-    marginTop: 8,
+    marginTop: 6,
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.28,
@@ -532,7 +678,7 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
-    marginTop: 22,
+    marginTop: 20,
     alignItems: 'center',
     gap: 4,
   },
