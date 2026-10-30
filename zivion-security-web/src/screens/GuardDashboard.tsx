@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   KeyRound, 
   QrCode, 
@@ -184,7 +185,48 @@ const INITIAL_RECORDS: VisitorEntry[] = [
 ];
 
 export const GuardDashboard = () => {
+  const navigate = useNavigate();
   const [currentScreen, setCurrentScreen] = useState<'otp' | 'visitors'>('otp');
+
+  // Guard Shift Duty & Live Duration State
+  const [isOnDuty, setIsOnDuty] = useState(true);
+  const [shiftStartTime, setShiftStartTime] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(d.getHours() - 2);
+    d.setMinutes(d.getMinutes() - 45);
+    return d;
+  });
+  const [shiftDurationSeconds, setShiftDurationSeconds] = useState(2 * 3600 + 45 * 60);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOnDuty) return;
+    const timer = setInterval(() => {
+      const now = new Date();
+      const diff = Math.max(0, Math.floor((now.getTime() - shiftStartTime.getTime()) / 1000));
+      setShiftDurationSeconds(diff);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isOnDuty, shiftStartTime]);
+
+  const formatDuration = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+  };
+
+  const handleStartDuty = () => {
+    setShiftStartTime(new Date());
+    setShiftDurationSeconds(0);
+    setIsOnDuty(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setLogoutModalOpen(false);
+    setIsOnDuty(false);
+    navigate('/');
+  };
   const [entries, setEntries] = useState<VisitorEntry[]>(INITIAL_RECORDS);
   const [activeQueue, setActiveQueue] = useState<QueueFilter>('pending');
   const [searchQuery, setSearchQuery] = useState('');
@@ -414,12 +456,67 @@ export const GuardDashboard = () => {
           </button>
         </div>
 
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button
+            onClick={() => setSupervisorDrawerOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-bold text-secondary hover:text-navy px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
+          >
+            <SlidersHorizontal size={14} className="stroke-[1.5]" />
+            <span>Supervisor Log</span>
+          </button>
+
+          <button
+            onClick={() => setLogoutModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 transition-colors"
+            title="Log Out"
+          >
+            <LogOut size={14} className="stroke-[2]" />
+            <span>Log Out</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Guard Shift Duty & Live Duration Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 px-5 rounded-2xl border border-slate-200/90 shadow-xs">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+            👮
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide ${isOnDuty ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isOnDuty ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
+                {isOnDuty ? 'ON DUTY' : 'OFF DUTY'}
+              </span>
+              <span className="text-xs font-bold text-navy">Surender Pal (GD-882)</span>
+            </div>
+            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-secondary font-medium">
+              <Clock size={12} className="text-blue-600" />
+              <span>Shift Duration:</span>
+              <span className="font-bold text-navy">{isOnDuty ? formatDuration(shiftDurationSeconds) : 'Shift Paused'}</span>
+            </div>
+          </div>
+        </div>
+
         <button
-          onClick={() => setSupervisorDrawerOpen(true)}
-          className="flex items-center gap-1.5 text-xs font-bold text-secondary hover:text-navy px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors self-end sm:self-auto"
+          onClick={isOnDuty ? () => setLogoutModalOpen(true) : handleStartDuty}
+          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-xs font-black transition-all shadow-xs ${
+            isOnDuty
+              ? 'bg-rose-600 hover:bg-rose-700 text-white'
+              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+          }`}
         >
-          <SlidersHorizontal size={14} className="stroke-[1.5]" />
-          <span>Supervisor Log</span>
+          {isOnDuty ? (
+            <>
+              <LogOut size={14} className="stroke-[2.5]" />
+              <span>Log Out Duty</span>
+            </>
+          ) : (
+            <>
+              <Check size={14} className="stroke-[2.5]" />
+              <span>Log In Duty</span>
+            </>
+          )}
         </button>
       </div>
 
@@ -1301,6 +1398,41 @@ export const GuardDashboard = () => {
                 </div>
               </div>
 
+              {/* Guard Shift Active Card in Supervisor Drawer */}
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-blue-900">Active Shift: Morning (06:00 - 14:00)</span>
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${isOnDuty ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>
+                    {isOnDuty ? '🟢 Active On Duty' : '⚪ Off Duty'}
+                  </span>
+                </div>
+                <div className="text-xs text-blue-800">
+                  <span className="font-bold">Guard on Duty:</span> Surender Pal (GD-882)
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-blue-200/80">
+                  <div className="flex items-center gap-1.5 text-xs text-blue-900 font-bold">
+                    <Clock size={14} className="text-blue-600" />
+                    <span>Duration:</span>
+                    <span className="text-blue-700 font-black">{formatDuration(shiftDurationSeconds)}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSupervisorDrawerOpen(false);
+                      if (isOnDuty) {
+                        setLogoutModalOpen(true);
+                      } else {
+                        handleStartDuty();
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black ${
+                      isOnDuty ? 'bg-rose-600 text-white hover:bg-rose-700' : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    }`}
+                  >
+                    {isOnDuty ? 'Log Out Shift' : 'Log In Shift'}
+                  </button>
+                </div>
+              </div>
+
               <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-2">Shift Security Directives</h4>
               <div className="space-y-2 text-xs text-secondary leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <p>• All food delivery riders must have positive approval from Residence App before gate loop opens.</p>
@@ -1315,6 +1447,51 @@ export const GuardDashboard = () => {
             >
               Close Supervisor Console
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Modal */}
+      {logoutModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full text-center space-y-4 shadow-2xl animate-in zoom-in-95">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">
+              <LogOut size={26} className="stroke-[2]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-navy">Confirm Duty Log Out</h3>
+              <p className="text-xs text-secondary mt-1">End active guard shift and calculate duty hours</p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-secondary">Guard:</span>
+                <span className="font-bold text-navy">Surender Pal (GD-882)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-secondary">Login Time:</span>
+                <span className="font-bold text-navy">{shiftStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div className="flex justify-between pt-1 border-t border-slate-200 text-blue-600 font-bold">
+                <span>Calculated Duration:</span>
+                <span className="text-blue-700 font-black">{formatDuration(shiftDurationSeconds)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                onClick={handleConfirmLogout}
+                className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black transition-colors"
+              >
+                Log Out & Exit to Login
+              </button>
+              <button
+                onClick={() => setLogoutModalOpen(false)}
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+              >
+                Cancel / Stay On Duty
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -189,9 +189,54 @@ const INITIAL_RECORDS: VisitorEntry[] = [
   },
 ];
 
-export const GuardDashboard: React.FC<{ navigation?: any }> = () => {
+export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) => {
   // Navigation: 1st Screen = OTP, Next Screen = Visitors & Vehicles
   const [currentScreen, setCurrentScreen] = useState<ScreenTab>('otp');
+
+  // Guard Shift / Duty Login & Live Duration State
+  const [isOnDuty, setIsOnDuty] = useState(true);
+  const [shiftStartTime, setShiftStartTime] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(d.getHours() - 2);
+    d.setMinutes(d.getMinutes() - 45);
+    return d;
+  });
+  const [shiftDurationSeconds, setShiftDurationSeconds] = useState(2 * 3600 + 45 * 60);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  // Live duration ticker
+  useEffect(() => {
+    if (!isOnDuty) return;
+    const timer = setInterval(() => {
+      const now = new Date();
+      const diff = Math.max(0, Math.floor((now.getTime() - shiftStartTime.getTime()) / 1000));
+      setShiftDurationSeconds(diff);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isOnDuty, shiftStartTime]);
+
+  const formatDuration = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+  };
+
+  const handleStartDuty = () => {
+    const now = new Date();
+    setShiftStartTime(now);
+    setShiftDurationSeconds(0);
+    setIsOnDuty(true);
+    Alert.alert('Shift Logged In', 'Guard is now ON DUTY. Live shift duration timer is running.');
+  };
+
+  const handleConfirmLogout = () => {
+    setLogoutModalOpen(false);
+    setIsOnDuty(false);
+    if (navigation?.navigate) {
+      navigation.navigate('Login');
+    }
+  };
 
   // Shared Entry Records & Queue Filter for Screen 2
   const [entries, setEntries] = useState<VisitorEntry[]>(INITIAL_RECORDS);
@@ -461,7 +506,55 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = () => {
           >
             <SlidersHorizontal size={19} color="#1E3A8A" strokeWidth={1.75} />
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.classicIconButton, styles.logoutHeaderBtn]} 
+            onPress={() => setLogoutModalOpen(true)}
+            activeOpacity={0.7}
+            accessibilityLabel="Log Out"
+          >
+            <LogOut size={18} color="#EF4444" strokeWidth={2} />
+          </TouchableOpacity>
         </View>
+      </View>
+
+      {/* =========================================================================
+          GUARD SHIFT & LIVE DURATION BAR (CLEAR LOG IN & LOG OUT BUTTON)
+         ========================================================================= */}
+      <View style={styles.dutyBar}>
+        <View style={styles.dutyBarLeft}>
+          <View style={[styles.dutyStatusPill, isOnDuty ? styles.dutyStatusPillActive : styles.dutyStatusPillInactive]}>
+            <View style={[styles.dutyDot, isOnDuty ? styles.dutyDotActive : styles.dutyDotInactive]} />
+            <Text style={[styles.dutyStatusText, isOnDuty ? styles.dutyStatusTextActive : styles.dutyStatusTextInactive]}>
+              {isOnDuty ? 'ON DUTY' : 'OFF DUTY'}
+            </Text>
+          </View>
+          <View style={styles.dutyTimerBox}>
+            <Clock size={13} color="#2563EB" strokeWidth={2} />
+            <Text style={styles.dutyTimerLabel}>Shift Duration:</Text>
+            <Text style={styles.dutyTimerVal}>
+              {isOnDuty ? formatDuration(shiftDurationSeconds) : 'Shift Paused'}
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.dutyToggleActionBtn, isOnDuty ? styles.dutyLogoutActionBtn : styles.dutyLoginActionBtn]}
+          onPress={isOnDuty ? () => setLogoutModalOpen(true) : handleStartDuty}
+          activeOpacity={0.8}
+        >
+          {isOnDuty ? (
+            <>
+              <LogOut size={13} color="#FFFFFF" strokeWidth={2.2} />
+              <Text style={styles.dutyToggleActionBtnText}>Log Out</Text>
+            </>
+          ) : (
+            <>
+              <Check size={14} color="#FFFFFF" strokeWidth={2.5} />
+              <Text style={styles.dutyToggleActionBtnText}>Log In</Text>
+            </>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* =========================================================================
@@ -1260,8 +1353,46 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = () => {
               </View>
 
               <View style={styles.supervisorDutyCard}>
-                <Text style={styles.dutyTitle}>Current Shift: Morning (06:00 - 14:00)</Text>
+                <View style={styles.supervisorDutyTitleRow}>
+                  <Text style={styles.dutyTitle}>Current Shift: Morning (06:00 - 14:00)</Text>
+                  <View style={[styles.dutyBadgeModal, isOnDuty ? styles.dutyBadgeActive : styles.dutyBadgeInactive]}>
+                    <Text style={[styles.dutyBadgeModalText, isOnDuty ? styles.dutyBadgeActiveText : styles.dutyBadgeInactiveText]}>
+                      {isOnDuty ? '🟢 Active On Duty' : '⚪ Off Duty'}
+                    </Text>
+                  </View>
+                </View>
+
                 <Text style={styles.dutyGuard}>Guard on Duty: Surender Pal (ID: GD-882)</Text>
+
+                <View style={styles.modalShiftDurationCard}>
+                  <View style={styles.modalShiftDurationRow}>
+                    <Clock size={15} color="#2563EB" strokeWidth={2} />
+                    <Text style={styles.modalShiftDurationLabel}>Calculated Duty Duration:</Text>
+                    <Text style={styles.modalShiftDurationVal}>{formatDuration(shiftDurationSeconds)}</Text>
+                  </View>
+                  <Text style={styles.modalShiftStartTimeNote}>
+                    Shift Started At: {shiftStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.modalDutyBtn, isOnDuty ? styles.modalDutyLogoutBtn : styles.modalDutyLoginBtn]}
+                  onPress={() => {
+                    setSupervisorModalOpen(false);
+                    if (isOnDuty) {
+                      setLogoutModalOpen(true);
+                    } else {
+                      handleStartDuty();
+                    }
+                  }}
+                  activeOpacity={0.85}
+                >
+                  <LogOut size={15} color="#FFFFFF" strokeWidth={2} />
+                  <Text style={styles.modalDutyBtnText}>
+                    {isOnDuty ? 'Log Out Guard Shift' : 'Log In Guard Shift'}
+                  </Text>
+                </TouchableOpacity>
+
                 <Text style={styles.dutyNote}>All biometric barriers and boom gates operational.</Text>
               </View>
 
@@ -1273,6 +1404,60 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = () => {
                 <Text style={styles.closeSheetBtnText}>Back to Console</Text>
               </TouchableOpacity>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* =========================================================================
+          MODAL: GUARD LOGOUT CONFIRMATION WITH TOTAL SHIFT DURATION
+         ========================================================================= */}
+      <Modal visible={logoutModalOpen} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.logoutModalCard}>
+            <View style={styles.logoutIconCircle}>
+              <LogOut size={26} color="#DC2626" strokeWidth={2} />
+            </View>
+            <Text style={styles.logoutModalTitle}>Confirm Duty Log Out</Text>
+            <Text style={styles.logoutModalSub}>
+              End active shift and calculate total working hours
+            </Text>
+
+            <View style={styles.logoutSummaryCard}>
+              <View style={styles.logoutSummaryRow}>
+                <Text style={styles.logoutSummaryLabel}>Guard Name:</Text>
+                <Text style={styles.logoutSummaryVal}>Surender Pal (GD-882)</Text>
+              </View>
+              <View style={styles.logoutSummaryRow}>
+                <Text style={styles.logoutSummaryLabel}>Shift Login Time:</Text>
+                <Text style={styles.logoutSummaryVal}>
+                  {shiftStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
+              <View style={styles.logoutSummaryRow}>
+                <Text style={styles.logoutSummaryLabel}>Calculated Duration:</Text>
+                <Text style={[styles.logoutSummaryVal, { color: '#2563EB', fontWeight: '800' }]}>
+                  {formatDuration(shiftDurationSeconds)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.logoutBtnGroup}>
+              <TouchableOpacity
+                style={styles.logoutConfirmBtn}
+                onPress={handleConfirmLogout}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.logoutConfirmBtnText}>Log Out & Return to Login</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutCancelBtn}
+                onPress={() => setLogoutModalOpen(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.logoutCancelBtnText}>Cancel / Stay On Duty</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -2460,6 +2645,254 @@ const styles = StyleSheet.create({
   dutyNote: {
     fontSize: 10,
     color: '#64748B',
+  },
+  logoutHeaderBtn: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  dutyBar: {
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dutyBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  dutyStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 5,
+  },
+  dutyStatusPillActive: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  dutyStatusPillInactive: {
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  dutyDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  dutyDotActive: {
+    backgroundColor: '#10B981',
+  },
+  dutyDotInactive: {
+    backgroundColor: '#94A3B8',
+  },
+  dutyStatusText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  dutyStatusTextActive: {
+    color: '#059669',
+  },
+  dutyStatusTextInactive: {
+    color: '#64748B',
+  },
+  dutyTimerBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dutyTimerLabel: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  dutyTimerVal: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#1E3A8A',
+  },
+  dutyToggleActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 5,
+  },
+  dutyLogoutActionBtn: {
+    backgroundColor: '#DC2626',
+  },
+  dutyLoginActionBtn: {
+    backgroundColor: '#059669',
+  },
+  dutyToggleActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  supervisorDutyTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dutyBadgeModal: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  dutyBadgeActive: {
+    backgroundColor: '#DCFCE7',
+  },
+  dutyBadgeInactive: {
+    backgroundColor: '#F1F5F9',
+  },
+  dutyBadgeModalText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  dutyBadgeActiveText: {
+    color: '#15803D',
+  },
+  dutyBadgeInactiveText: {
+    color: '#64748B',
+  },
+  modalShiftDurationCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+    padding: 8,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  modalShiftDurationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  modalShiftDurationLabel: {
+    fontSize: 11,
+    color: '#475569',
+    fontWeight: '600',
+  },
+  modalShiftDurationVal: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2563EB',
+  },
+  modalShiftStartTimeNote: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  modalDutyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 8,
+    gap: 6,
+  },
+  modalDutyLogoutBtn: {
+    backgroundColor: '#DC2626',
+  },
+  modalDutyLoginBtn: {
+    backgroundColor: '#059669',
+  },
+  modalDutyBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  logoutModalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 22,
+    width: '90%',
+    maxWidth: 380,
+    alignItems: 'center',
+  },
+  logoutIconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  logoutModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  logoutModalSub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  logoutSummaryCard: {
+    width: '100%',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 8,
+    marginBottom: 18,
+  },
+  logoutSummaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logoutSummaryLabel: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  logoutSummaryVal: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  logoutBtnGroup: {
+    width: '100%',
+    gap: 8,
+  },
+  logoutConfirmBtn: {
+    backgroundColor: '#DC2626',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  logoutConfirmBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  logoutCancelBtn: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: 'center',
+  },
+  logoutCancelBtnText: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '600',
   },
   closeSheetBtn: {
     backgroundColor: '#F1F5F9',
