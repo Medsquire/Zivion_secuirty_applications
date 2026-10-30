@@ -59,8 +59,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const detectedRole: RoleType = detectedAccount
     ? detectedAccount.role
     : phoneNumber.endsWith('1')
-    ? 'supervisor'
-    : 'guard';
+      ? 'supervisor'
+      : 'guard';
 
   const handlePhoneChange = (text: string) => {
     // Keep only digits, max 10
@@ -140,8 +140,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   <Shield color="#FFFFFF" size={24} />
                 </LinearGradient>
                 <View>
-                  <Text style={styles.brandTitle}>ZIVION SECURITY</Text>
-                  <Text style={styles.brandSubtitle}>Gate & Checkpoint Terminal</Text>
+                  <Text style={styles.brandTitle}>Bee SECURITY</Text>
+                  <Text style={styles.brandSubtitle}></Text>
                 </View>
               </View>
             </View>
@@ -158,7 +158,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           {/* Title */}
           <Text style={styles.formTitle}>Sign In</Text>
           <Text style={styles.formSubtitle}>
-            Role is automatically verified from your mobile number
+            
           </Text>
 
           {/* Quick Demo Logins Selector */}
@@ -187,27 +187,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.quickLoginChip,
-                  detectedRole === 'supervisor' && styles.activeSupervisorChip,
-                ]}
-                onPress={() => fillQuickLogin('supervisor')}
-                activeOpacity={0.8}
-              >
-                <UserCheck
-                  size={15}
-                  color={detectedRole === 'supervisor' ? '#4F46E5' : '#64748B'}
-                />
-                <Text
-                  style={[
-                    styles.quickLoginChipText,
-                    detectedRole === 'supervisor' && styles.activeSupervisorChipText,
-                  ]}
-                >
-                  Supervisor (9876543211)
-                </Text>
-              </TouchableOpacity>
+              
             </View>
           </View>
 
