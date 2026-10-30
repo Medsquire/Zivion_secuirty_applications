@@ -10,7 +10,8 @@ import {
   TextInput, 
   Alert,
   Image,
-  StatusBar
+  StatusBar,
+  Platform
 } from 'react-native';
 import { 
   Shield, 
@@ -1350,9 +1351,10 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
       {/* =========================================================================
           MODAL: GUARD LOGOUT CONFIRMATION WITH TOTAL SHIFT DURATION
          ========================================================================= */}
-      <Modal visible={logoutModalOpen} animationType="fade" transparent>
+      <Modal visible={logoutModalOpen} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.logoutModalCard}>
+            <View style={styles.logoutHandle} />
             <View style={styles.logoutIconCircle}>
               <LogOut size={26} color="#DC2626" strokeWidth={2} />
             </View>
@@ -2761,11 +2763,28 @@ const styles = StyleSheet.create({
   },
   logoutModalCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 22,
-    width: '90%',
-    maxWidth: 380,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingHorizontal: 22,
+    paddingTop: 14,
+    paddingBottom: Platform.OS === 'ios' ? 38 : 28,
+    width: '100%',
     alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  logoutHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E2E8F0',
+    marginBottom: 16,
+    alignSelf: 'center',
   },
   logoutIconCircle: {
     width: 50,
