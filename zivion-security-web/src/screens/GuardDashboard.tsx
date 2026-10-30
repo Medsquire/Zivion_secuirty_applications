@@ -251,9 +251,8 @@ export const GuardDashboard = () => {
   // Vehicle Log Modal
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [vehPlate, setVehPlate] = useState('');
-  const [vehType, setVehType] = useState<'Resident' | 'Guest' | 'Cab' | 'Service'>('Guest');
-  const [vehBlock, setVehBlock] = useState('Block A');
-  const [vehFlat, setVehFlat] = useState('104');
+  const [serviceOption, setServiceOption] = useState<'RWA' | 'Admin'>('RWA');
+  const [vehLocation, setVehLocation] = useState('');
 
   // Supervisor Shift Drawer
   const [supervisorDrawerOpen, setSupervisorDrawerOpen] = useState(false);
@@ -377,21 +376,21 @@ export const GuardDashboard = () => {
   // Add Vehicle Entry
   const handleAddVehicle = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vehPlate.trim()) return;
+    if (!vehPlate.trim() || !vehLocation.trim()) return;
 
-    const mapped = FLATS_MAP[vehFlat] || { resident: 'Resident', phone: '' };
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const newVehicleEntry: VisitorEntry = {
       id: nextId(),
-      name: `${vehType} Vehicle (${vehPlate.toUpperCase()})`,
+      name: `Service Vehicle (${vehPlate.toUpperCase()})`,
       type: 'visitor',
+      company: serviceOption,
       apartmentName: APARTMENT_NAME,
-      block: vehBlock,
-      floor: '1st Floor',
-      flat: vehFlat,
-      residentName: mapped.resident,
+      block: `${serviceOption} Service`,
+      floor: 'Society Ground',
+      flat: vehLocation.trim(),
+      residentName: `${serviceOption} Authority`,
       vehicleNo: vehPlate.toUpperCase(),
       status: 'in',
       requestedAt: timeStr,
@@ -402,6 +401,7 @@ export const GuardDashboard = () => {
     setEntries(prev => [newVehicleEntry, ...prev]);
     setVehicleModalOpen(false);
     setVehPlate('');
+    setVehLocation('');
     setActiveQueue('in');
   };
 
@@ -807,7 +807,7 @@ export const GuardDashboard = () => {
                       {/* Apartment Destination Hierarchy Pill */}
                       <span className="px-2.5 py-0.5 rounded-md text-[11px] font-black bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
                         <Home size={11} className="stroke-[1.75]" />
-                        <span>{entry.block} • Flat {entry.flat}</span>
+                        <span>{entry.company === 'RWA' || entry.company === 'Admin' || entry.block.includes('Service') ? `${entry.block} • Location: ${entry.flat}` : `${entry.block} • Flat ${entry.flat}`}</span>
                       </span>
                     </div>
 
@@ -1302,56 +1302,45 @@ export const GuardDashboard = () => {
 
               <div>
                 <label className="block text-xs font-black text-navy uppercase mb-1">
-                  Vehicle Category
+                  Service Category *
                 </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {(['Resident', 'Guest', 'Cab', 'Service'] as const).map(t => (
+                <div className="grid grid-cols-2 gap-2">
+                  {(['RWA', 'Admin'] as const).map(opt => (
                     <button
-                      key={t}
+                      key={opt}
                       type="button"
-                      onClick={() => setVehType(t)}
-                      className={`py-2 rounded-xl text-xs font-bold border transition-all ${
-                        vehType === t 
+                      onClick={() => setServiceOption(opt)}
+                      className={`py-2.5 rounded-xl text-xs font-black border transition-all ${
+                        serviceOption === opt 
                           ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
                           : 'bg-slate-50 text-navy border-slate-200 hover:bg-slate-100'
                       }`}
                     >
-                      {t}
+                      {opt}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Destination */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-black text-navy uppercase mb-1">Block</label>
-                  <select
-                    value={vehBlock}
-                    onChange={(e) => setVehBlock(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-navy"
-                  >
-                    {BLOCKS.map(b => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black text-navy uppercase mb-1">Flat</label>
-                  <select
-                    value={vehFlat}
-                    onChange={(e) => setVehFlat(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-navy"
-                  >
-                    {['101', '102', '103', '104', '201', '202', '301', '402'].map(fl => <option key={fl} value={fl}>Flat {fl}</option>)}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-black text-navy uppercase mb-1">
+                  Location *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter location (e.g. Clubhouse, STP, Basement, Gate 2)"
+                  value={vehLocation}
+                  onChange={(e) => setVehLocation(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-navy placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
               </div>
 
               <button
                 type="submit"
                 className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm tracking-wide shadow-md shadow-emerald-600/20 active:scale-95 transition-all mt-2"
               >
-                LOG VEHICLE ENTRY (IN)
+                ALLOW SERVICE VEHICLE INSIDE
               </button>
 
             </form>
