@@ -338,9 +338,8 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
 
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [vehPlate, setVehPlate] = useState('');
-  const [vehType, setVehType] = useState<'Guest' | 'Resident' | 'Cab' | 'Service'>('Guest');
-  const [vehBlock, setVehBlock] = useState('Block A');
-  const [vehFlat, setVehFlat] = useState('104');
+  const [serviceOption, setServiceOption] = useState<'RWA' | 'Admin'>('RWA');
+  const [vehLocation, setVehLocation] = useState('');
 
   // Supervisor Shift Drawer & SOS
   const [supervisorModalOpen, setSupervisorModalOpen] = useState(false);
@@ -419,20 +418,24 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
       Alert.alert('Required', 'Please enter vehicle registration number.');
       return;
     }
+    if (!vehLocation.trim()) {
+      Alert.alert('Required', 'Please enter service location.');
+      return;
+    }
 
-    const mapped = FLATS_MAP[vehFlat] || { resident: 'Resident', phone: '' };
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     const newVehicleEntry: VisitorEntry = {
       id: nextId(),
-      name: `${vehType} Vehicle (${vehPlate.toUpperCase()})`,
+      name: `Service Vehicle (${vehPlate.toUpperCase()})`,
       type: 'visitor',
+      company: serviceOption,
       apartmentName: APARTMENT_NAME,
-      block: vehBlock,
-      floor: '1st Floor',
-      flat: vehFlat,
-      residentName: mapped.resident,
+      block: `${serviceOption} Service`,
+      floor: 'Society Ground',
+      flat: vehLocation.trim(),
+      residentName: `${serviceOption} Authority`,
       vehicleNo: vehPlate.toUpperCase(),
       status: 'in',
       requestedAt: timeStr,
@@ -443,6 +446,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
     setEntries(prev => [newVehicleEntry, ...prev]);
     setVehicleModalOpen(false);
     setVehPlate('');
+    setVehLocation('');
     setActiveQueue('in');
   };
 
@@ -727,14 +731,14 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
             {/* 2. Add Vehicle */}
             <TouchableOpacity 
               style={styles.secondaryVehicleCard} 
-              onPress={() => { setVehPlate(''); setVehicleModalOpen(true); }}
+              onPress={() => { setVehPlate(''); setVehLocation(''); setServiceOption('RWA'); setVehicleModalOpen(true); }}
               activeOpacity={0.85}
             >
               <View style={styles.secondaryVehicleIconWrap}>
                 <Car size={22} color="#059669" strokeWidth={1.75} />
               </View>
               <Text style={styles.secondaryVehicleTitle}>+ Log Vehicle</Text>
-              <Text style={styles.secondaryVehicleSub}>Plate & Flat</Text>
+              <Text style={styles.secondaryVehicleSub}>Service (RWA / Admin)</Text>
             </TouchableOpacity>
           </View>
 
@@ -851,12 +855,18 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                     <View style={styles.destRow}>
                       <Building size={14} color="#2563EB" strokeWidth={1.75} />
                       <Text style={styles.destText}>
-                        {item.block} • {item.floor} • Flat {item.flat}
+                        {item.company === 'RWA' || item.company === 'Admin' || item.block.includes('Service')
+                          ? `${item.block} • Location: ${item.flat}`
+                          : `${item.block} • ${item.floor} • Flat ${item.flat}`}
                       </Text>
                     </View>
                     <View style={styles.residentRow}>
                       <User size={13} color="#475569" strokeWidth={1.75} />
-                      <Text style={styles.residentText}>Resident: {item.residentName}</Text>
+                      <Text style={styles.residentText}>
+                        {item.company === 'RWA' || item.company === 'Admin' || item.block.includes('Service')
+                          ? `Authority: ${item.residentName}`
+                          : `Resident: ${item.residentName}`}
+                      </Text>
                     </View>
                     {item.vehicleNo && (
                       <View style={styles.plateRow}>
@@ -1258,17 +1268,17 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>VEHICLE CATEGORY</Text>
+                <Text style={styles.formLabel}>SERVICE CATEGORY *</Text>
                 <View style={styles.vehTypeRow}>
-                  {(['Guest', 'Resident', 'Cab', 'Service'] as const).map(type => (
+                  {(['RWA', 'Admin'] as const).map(opt => (
                     <TouchableOpacity
-                      key={type}
-                      style={[styles.vehTypeBtn, vehType === type && styles.vehTypeBtnActive]}
-                      onPress={() => setVehType(type)}
+                      key={opt}
+                      style={[styles.vehTypeBtn, serviceOption === opt && styles.vehTypeBtnActive]}
+                      onPress={() => setServiceOption(opt)}
                       activeOpacity={0.8}
                     >
-                      <Text style={[styles.vehTypeBtnText, vehType === type && styles.vehTypeBtnTextActive]}>
-                        {type}
+                      <Text style={[styles.vehTypeBtnText, serviceOption === opt && styles.vehTypeBtnTextActive]}>
+                        {opt}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -1276,35 +1286,14 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>DESTINATION BLOCK & FLAT</Text>
-                <View style={[styles.pillsRow, { marginBottom: 8 }]}>
-                  {BLOCKS.map(blk => (
-                    <TouchableOpacity
-                      key={blk}
-                      style={[styles.pillBtn, vehBlock === blk && styles.pillBtnActive]}
-                      onPress={() => setVehBlock(blk)}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={[styles.pillBtnText, vehBlock === blk && styles.pillBtnTextActive]}>
-                        {blk}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <View style={styles.pillsRow}>
-                  {['101', '104', '201', '202', '301', '402'].map(flt => (
-                    <TouchableOpacity
-                      key={flt}
-                      style={[styles.flatPill, vehFlat === flt && styles.flatPillActive]}
-                      onPress={() => setVehFlat(flt)}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={[styles.flatPillText, vehFlat === flt && styles.flatPillTextActive]}>
-                        Flat {flt}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                <Text style={styles.formLabel}>LOCATION *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="Enter location (e.g. Clubhouse, STP Plant, Basement, Gate 2)"
+                  placeholderTextColor="#94A3B8"
+                  value={vehLocation}
+                  onChangeText={setVehLocation}
+                />
               </View>
 
               <TouchableOpacity 
@@ -1313,7 +1302,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                 activeOpacity={0.85}
               >
                 <Car size={18} color="#FFFFFF" strokeWidth={2} />
-                <Text style={styles.submitReqBtnText}>ALLOW VEHICLE INSIDE</Text>
+                <Text style={styles.submitReqBtnText}>ALLOW SERVICE VEHICLE INSIDE</Text>
               </TouchableOpacity>
             </View>
           </View>
