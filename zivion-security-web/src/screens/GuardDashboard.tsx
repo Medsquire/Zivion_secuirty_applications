@@ -476,49 +476,7 @@ export const GuardDashboard = () => {
         </div>
       </div>
 
-      {/* Guard Shift Duty & Live Duration Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 px-5 rounded-2xl border border-slate-200/90 shadow-xs">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
-            👮
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black tracking-wide ${isOnDuty ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isOnDuty ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
-                {isOnDuty ? 'ON DUTY' : 'OFF DUTY'}
-              </span>
-              <span className="text-xs font-bold text-navy">Surender Pal (GD-882)</span>
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-secondary font-medium">
-              <Clock size={12} className="text-blue-600" />
-              <span>Shift Duration:</span>
-              <span className="font-bold text-navy">{isOnDuty ? formatDuration(shiftDurationSeconds) : 'Shift Paused'}</span>
-            </div>
-          </div>
-        </div>
 
-        <button
-          onClick={isOnDuty ? () => setLogoutModalOpen(true) : handleStartDuty}
-          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-xs font-black transition-all shadow-xs ${
-            isOnDuty
-              ? 'bg-rose-600 hover:bg-rose-700 text-white'
-              : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-          }`}
-        >
-          {isOnDuty ? (
-            <>
-              <LogOut size={14} className="stroke-[2.5]" />
-              <span>Log Out Duty</span>
-            </>
-          ) : (
-            <>
-              <Check size={14} className="stroke-[2.5]" />
-              <span>Log In Duty</span>
-            </>
-          )}
-        </button>
-      </div>
 
       {/* =========================================================================
           FIRST SCREEN: NO OVERVIEW • DIRECT OTP & SMALL SCAN & SUBMIT
