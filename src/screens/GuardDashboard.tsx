@@ -1005,6 +1005,84 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                 </TouchableOpacity>
               </View>
 
+              {/* 4-Step Hierarchy */}
+              <View style={styles.hierarchyCard}>
+                <View style={styles.hierarchyTitleRow}>
+                  <Building size={16} color="#2563EB" strokeWidth={1.75} />
+                  <Text style={styles.hierarchyTitle}>DESTINATION FLAT HIERARCHY</Text>
+                </View>
+
+                <View style={styles.hierarchyStep}>
+                  <Text style={styles.stepLabel}>1. Apartment Society</Text>
+                  <View style={styles.fixedAptBox}>
+                    <Text style={styles.fixedAptText}>{APARTMENT_NAME}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.hierarchyStep}>
+                  <Text style={styles.stepLabel}>2. Select Block</Text>
+                  <View style={styles.pillsRow}>
+                    {BLOCKS.map(blk => (
+                      <TouchableOpacity
+                        key={blk}
+                        style={[styles.pillBtn, selectedBlock === blk && styles.pillBtnActive]}
+                        onPress={() => setSelectedBlock(blk)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.pillBtnText, selectedBlock === blk && styles.pillBtnTextActive]}>
+                          {blk}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.hierarchyStep}>
+                  <Text style={styles.stepLabel}>3. Select Floor</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {FLOORS.map(flr => (
+                      <TouchableOpacity
+                        key={flr}
+                        style={[styles.pillBtn, selectedFloor === flr && styles.pillBtnActive]}
+                        onPress={() => setSelectedFloor(flr)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.pillBtnText, selectedFloor === flr && styles.pillBtnTextActive]}>
+                          {flr}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                <View style={styles.hierarchyStep}>
+                  <Text style={styles.stepLabel}>4. Select Flat / Door</Text>
+                  <View style={styles.flatGrid}>
+                    {['101', '102', '103', '104', '201', '202', '203', '204', '301', '302'].map(flt => (
+                      <TouchableOpacity
+                        key={flt}
+                        style={[styles.flatPill, selectedFlat === flt && styles.flatPillActive]}
+                        onPress={() => setSelectedFlat(flt)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.flatPillText, selectedFlat === flt && styles.flatPillTextActive]}>
+                          Flat {flt}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.linkedResidentBox}>
+                  <View style={styles.linkedResidentHeader}>
+                    <User size={14} color="#059669" strokeWidth={1.75} />
+                    <Text style={styles.linkedResidentTitle}>Auto-Linked Resident on Residence App</Text>
+                  </View>
+                  <Text style={styles.linkedResidentName}>{selectedResident.resident}</Text>
+                  <Text style={styles.linkedResidentPhone}>{selectedResident.phone}</Text>
+                </View>
+              </View>
+
               {entryKind === 'delivery' && (
                 <View style={styles.formGroup}>
                   <Text style={styles.formLabel}>SELECT DELIVERY COMPANY</Text>
@@ -1095,83 +1173,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                 </View>
               </View>
 
-              {/* 4-Step Hierarchy */}
-              <View style={styles.hierarchyCard}>
-                <View style={styles.hierarchyTitleRow}>
-                  <Building size={16} color="#2563EB" strokeWidth={1.75} />
-                  <Text style={styles.hierarchyTitle}>DESTINATION FLAT HIERARCHY</Text>
-                </View>
 
-                <View style={styles.hierarchyStep}>
-                  <Text style={styles.stepLabel}>1. Apartment Society</Text>
-                  <View style={styles.fixedAptBox}>
-                    <Text style={styles.fixedAptText}>{APARTMENT_NAME}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.hierarchyStep}>
-                  <Text style={styles.stepLabel}>2. Select Block</Text>
-                  <View style={styles.pillsRow}>
-                    {BLOCKS.map(blk => (
-                      <TouchableOpacity
-                        key={blk}
-                        style={[styles.pillBtn, selectedBlock === blk && styles.pillBtnActive]}
-                        onPress={() => setSelectedBlock(blk)}
-                        activeOpacity={0.8}
-                      >
-                        <Text style={[styles.pillBtnText, selectedBlock === blk && styles.pillBtnTextActive]}>
-                          {blk}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-
-                <View style={styles.hierarchyStep}>
-                  <Text style={styles.stepLabel}>3. Select Floor</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {FLOORS.map(flr => (
-                      <TouchableOpacity
-                        key={flr}
-                        style={[styles.pillBtn, selectedFloor === flr && styles.pillBtnActive]}
-                        onPress={() => setSelectedFloor(flr)}
-                        activeOpacity={0.8}
-                      >
-                        <Text style={[styles.pillBtnText, selectedFloor === flr && styles.pillBtnTextActive]}>
-                          {flr}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-
-                <View style={styles.hierarchyStep}>
-                  <Text style={styles.stepLabel}>4. Select Flat / Door</Text>
-                  <View style={styles.flatGrid}>
-                    {['101', '102', '103', '104', '201', '202', '203', '204', '301', '302'].map(flt => (
-                      <TouchableOpacity
-                        key={flt}
-                        style={[styles.flatPill, selectedFlat === flt && styles.flatPillActive]}
-                        onPress={() => setSelectedFlat(flt)}
-                        activeOpacity={0.8}
-                      >
-                        <Text style={[styles.flatPillText, selectedFlat === flt && styles.flatPillTextActive]}>
-                          Flat {flt}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-
-                <View style={styles.linkedResidentBox}>
-                  <View style={styles.linkedResidentHeader}>
-                    <User size={14} color="#059669" strokeWidth={1.75} />
-                    <Text style={styles.linkedResidentTitle}>Auto-Linked Resident on Residence App</Text>
-                  </View>
-                  <Text style={styles.linkedResidentName}>{selectedResident.resident}</Text>
-                  <Text style={styles.linkedResidentPhone}>{selectedResident.phone}</Text>
-                </View>
-              </View>
 
               <TouchableOpacity 
                 style={styles.submitReqBtn} 

@@ -894,6 +894,96 @@ export const GuardDashboard = () => {
 
             <form onSubmit={handleSendRequestToResident} className="space-y-4">
               
+              {/* =========================================================================
+                  APARTMENT DESTINATION HIERARCHY: Apartment -> Block -> Floor -> Flat
+                 ========================================================================= */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-navy uppercase tracking-wider flex items-center gap-1.5">
+                    <Building2 size={14} className="text-electric stroke-[1.75]" />
+                    <span>Destination Hierarchy</span>
+                  </span>
+                  <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    {APARTMENT_NAME}
+                  </span>
+                </div>
+
+                {/* 1. SELECT BLOCK */}
+                <div>
+                  <span className="block text-[11px] font-bold text-secondary mb-1">1. Select Block</span>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {BLOCKS.map(b => (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setSelectedBlock(b)}
+                        className={`py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                          selectedBlock === b 
+                            ? 'bg-navy text-white border-navy shadow-xs' 
+                            : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {b}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 2. SELECT FLOOR */}
+                <div>
+                  <span className="block text-[11px] font-bold text-secondary mb-1">2. Select Floor</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {FLOORS.map(f => (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => setSelectedFloor(f)}
+                        className={`py-1.5 rounded-lg text-[11px] font-bold transition-all border ${
+                          selectedFloor === f 
+                            ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
+                            : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. SELECT FLAT */}
+                <div>
+                  <span className="block text-[11px] font-bold text-secondary mb-1">3. Select Flat Number</span>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {['101', '102', '103', '104', '201', '202', '301', '402'].map(fl => (
+                      <button
+                        key={fl}
+                        type="button"
+                        onClick={() => setSelectedFlat(fl)}
+                        className={`py-2 rounded-lg text-xs font-black transition-all border ${
+                          selectedFlat === fl 
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
+                            : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        Flat {fl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mapped Resident Confirmation */}
+                <div className="p-2.5 rounded-xl bg-white border border-blue-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-black text-navy">{selectedBlock} • {selectedFloor} • Flat {selectedFlat}</span>
+                    <p className="text-[11px] text-blue-700 font-medium">Mapped Resident: <strong>{currentResidentPreview}</strong></p>
+                  </div>
+                  <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200">
+                    Residence App Sync
+                  </span>
+                </div>
+
+              </div>
+
               {/* IF DELIVERY: SELECT DELIVERY COMPANY */}
               {entryKind === 'delivery' && (
                 <div>
@@ -992,96 +1082,6 @@ export const GuardDashboard = () => {
                     placeholder="e.g. DL 01 AB 1234"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-mono font-bold text-navy focus:outline-none focus:border-electric"
                   />
-                </div>
-
-              </div>
-
-              {/* =========================================================================
-                  APARTMENT DESTINATION HIERARCHY: Apartment -> Block -> Floor -> Flat
-                 ========================================================================= */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-navy uppercase tracking-wider flex items-center gap-1.5">
-                    <Building2 size={14} className="text-electric stroke-[1.75]" />
-                    <span>Destination Hierarchy</span>
-                  </span>
-                  <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                    {APARTMENT_NAME}
-                  </span>
-                </div>
-
-                {/* 1. SELECT BLOCK */}
-                <div>
-                  <span className="block text-[11px] font-bold text-secondary mb-1">1. Select Block</span>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {BLOCKS.map(b => (
-                      <button
-                        key={b}
-                        type="button"
-                        onClick={() => setSelectedBlock(b)}
-                        className={`py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                          selectedBlock === b 
-                            ? 'bg-navy text-white border-navy shadow-xs' 
-                            : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        {b}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 2. SELECT FLOOR */}
-                <div>
-                  <span className="block text-[11px] font-bold text-secondary mb-1">2. Select Floor</span>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {FLOORS.map(f => (
-                      <button
-                        key={f}
-                        type="button"
-                        onClick={() => setSelectedFloor(f)}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold transition-all border ${
-                          selectedFloor === f 
-                            ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
-                            : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        {f}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 3. SELECT FLAT */}
-                <div>
-                  <span className="block text-[11px] font-bold text-secondary mb-1">3. Select Flat Number</span>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {['101', '102', '103', '104', '201', '202', '301', '402'].map(fl => (
-                      <button
-                        key={fl}
-                        type="button"
-                        onClick={() => setSelectedFlat(fl)}
-                        className={`py-2 rounded-lg text-xs font-black transition-all border ${
-                          selectedFlat === fl 
-                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
-                            : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        Flat {fl}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Mapped Resident Confirmation */}
-                <div className="p-2.5 rounded-xl bg-white border border-blue-200 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-black text-navy">{selectedBlock} • {selectedFloor} • Flat {selectedFlat}</span>
-                    <p className="text-[11px] text-blue-700 font-medium">Mapped Resident: <strong>{currentResidentPreview}</strong></p>
-                  </div>
-                  <span className="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200">
-                    Residence App Sync
-                  </span>
                 </div>
 
               </div>

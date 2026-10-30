@@ -64,7 +64,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Building2 size={22} className="text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-wide leading-none text-white">BEE PROPERTY</span>
+              <span className="text-xl font-bold tracking-wide leading-none text-white">BEE Security</span>
               <span className="text-[10px] font-medium text-cyan mt-1 tracking-wider uppercase">Guard Console</span>
             </div>
           </div>
