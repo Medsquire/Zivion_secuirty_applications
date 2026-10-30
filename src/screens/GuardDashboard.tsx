@@ -31,7 +31,6 @@ import {
   Camera, 
   Building, 
   User, 
-  ArrowRight, 
   ChevronLeft, 
   Users, 
   ScanLine 
@@ -522,44 +521,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
         </View>
       </View>
 
-      {/* =========================================================================
-          GUARD SHIFT & LIVE DURATION BAR (CLEAR LOG IN & LOG OUT BUTTON)
-         ========================================================================= */}
-      <View style={styles.dutyBar}>
-        <View style={styles.dutyBarLeft}>
-          <View style={[styles.dutyStatusPill, isOnDuty ? styles.dutyStatusPillActive : styles.dutyStatusPillInactive]}>
-            <View style={[styles.dutyDot, isOnDuty ? styles.dutyDotActive : styles.dutyDotInactive]} />
-            <Text style={[styles.dutyStatusText, isOnDuty ? styles.dutyStatusTextActive : styles.dutyStatusTextInactive]}>
-              {isOnDuty ? 'ON DUTY' : 'OFF DUTY'}
-            </Text>
-          </View>
-          <View style={styles.dutyTimerBox}>
-            <Clock size={13} color="#2563EB" strokeWidth={2} />
-            <Text style={styles.dutyTimerLabel}>Shift Duration:</Text>
-            <Text style={styles.dutyTimerVal}>
-              {isOnDuty ? formatDuration(shiftDurationSeconds) : 'Shift Paused'}
-            </Text>
-          </View>
-        </View>
 
-        <TouchableOpacity 
-          style={[styles.dutyToggleActionBtn, isOnDuty ? styles.dutyLogoutActionBtn : styles.dutyLoginActionBtn]}
-          onPress={isOnDuty ? () => setLogoutModalOpen(true) : handleStartDuty}
-          activeOpacity={0.8}
-        >
-          {isOnDuty ? (
-            <>
-              <LogOut size={13} color="#FFFFFF" strokeWidth={2.2} />
-              <Text style={styles.dutyToggleActionBtnText}>Log Out</Text>
-            </>
-          ) : (
-            <>
-              <Check size={14} color="#FFFFFF" strokeWidth={2.5} />
-              <Text style={styles.dutyToggleActionBtnText}>Log In</Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
 
       {/* =========================================================================
           FIRST SCREEN: NO OVERVIEW • DIRECT OTP & SMALL SCAN & SUBMIT
@@ -686,21 +648,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
             </View>
           </View>
 
-          {/* Transition Button to Next Screen */}
-          <TouchableOpacity 
-            style={styles.nextScreenBannerBtn}
-            onPress={() => setCurrentScreen('visitors')}
-            activeOpacity={0.85}
-          >
-            <View style={styles.nextScreenBannerLeft}>
-              <Users size={18} color="#2563EB" strokeWidth={1.75} />
-              <View>
-                <Text style={styles.nextScreenBannerTitle}>Visitors & Vehicles</Text>
-                <Text style={styles.nextScreenBannerSub}>Log guest, delivery rider or vehicle</Text>
-              </View>
-            </View>
-            <ArrowRight size={18} color="#2563EB" strokeWidth={2} />
-          </TouchableOpacity>
+
         </ScrollView>
       )}
 
