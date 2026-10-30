@@ -911,13 +911,13 @@ export const GuardDashboard = () => {
                 {/* 1. SELECT BLOCK */}
                 <div>
                   <span className="block text-[11px] font-bold text-secondary mb-1">1. Select Block</span>
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                     {BLOCKS.map(b => (
                       <button
                         key={b}
                         type="button"
                         onClick={() => setSelectedBlock(b)}
-                        className={`py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                        className={`px-3 py-1.5 shrink-0 rounded-lg text-xs font-bold transition-all border whitespace-nowrap ${
                           selectedBlock === b 
                             ? 'bg-navy text-white border-navy shadow-xs' 
                             : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
@@ -932,13 +932,13 @@ export const GuardDashboard = () => {
                 {/* 2. SELECT FLOOR */}
                 <div>
                   <span className="block text-[11px] font-bold text-secondary mb-1">2. Select Floor</span>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                     {FLOORS.map(f => (
                       <button
                         key={f}
                         type="button"
                         onClick={() => setSelectedFloor(f)}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold transition-all border ${
+                        className={`px-3 py-1.5 shrink-0 rounded-lg text-[11px] font-bold transition-all border whitespace-nowrap ${
                           selectedFloor === f 
                             ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
                             : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
@@ -953,13 +953,13 @@ export const GuardDashboard = () => {
                 {/* 3. SELECT FLAT */}
                 <div>
                   <span className="block text-[11px] font-bold text-secondary mb-1">3. Select Flat Number</span>
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                     {['101', '102', '103', '104', '201', '202', '301', '402'].map(fl => (
                       <button
                         key={fl}
                         type="button"
                         onClick={() => setSelectedFlat(fl)}
-                        className={`py-2 rounded-lg text-xs font-black transition-all border ${
+                        className={`px-3 py-2 shrink-0 rounded-lg text-xs font-black transition-all border whitespace-nowrap ${
                           selectedFlat === fl 
                             ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
                             : 'bg-white text-navy border-slate-200 hover:bg-slate-100'
@@ -990,7 +990,7 @@ export const GuardDashboard = () => {
                   <label className="block text-xs font-black text-navy uppercase mb-2">
                     Select Delivery Partner
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                     {DELIVERY_COMPANIES.map(comp => (
                       <button
                         key={comp.name}
@@ -999,7 +999,7 @@ export const GuardDashboard = () => {
                           setSelectedCompany(comp.name);
                           setVisitorName(`${comp.name} Partner`);
                         }}
-                        className={`p-2.5 rounded-xl border text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
+                        className={`px-3.5 py-2.5 shrink-0 rounded-xl border text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
                           selectedCompany === comp.name
                             ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
                             : 'bg-slate-50 text-navy border-slate-200 hover:bg-slate-100'
