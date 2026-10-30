@@ -3,18 +3,34 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Modal } from '../components/Modal';
-import { Search, Filter, Clock, CheckCircle2, LogOut, MoreVertical, Camera, ShieldCheck } from 'lucide-react';
+import { 
+  Search, 
+  Filter, 
+  Clock, 
+  CheckCircle2, 
+  LogOut, 
+  MoreVertical, 
+  Camera, 
+  ShieldCheck,
+  User,
+  Package,
+  Phone,
+  Home,
+  ArrowRight,
+  Plus
+} from 'lucide-react';
 
 const INITIAL_VISITORS = [
   { id: '1', name: 'John Smith', type: 'Guest', block: 'A', apt: '104', timeIn: '09:15 AM', timeOut: null, status: 'Inside', phone: '+1 234-567-8900', duration: null },
-  { id: '2', name: 'Amazon Delivery', type: 'Delivery', block: 'B', apt: '302', timeIn: '09:45 AM', timeOut: null, status: 'Inside', phone: '-', duration: null },
+  { id: '2', name: 'Amazon Delivery', type: 'Delivery', block: 'B', apt: '302', timeIn: '09:45 AM', timeOut: null, status: 'Inside', phone: '+1 800-444-3322', duration: null },
   { id: '3', name: 'Sarah Connor', type: 'Guest', block: 'C', apt: '505', timeIn: '08:30 AM', timeOut: '10:45 AM', status: 'Checked Out', phone: '+1 987-654-3210', duration: '2h 15m' },
   { id: '4', name: 'Mike Ross', type: 'Guest', block: 'A', apt: '201', timeIn: '10:05 AM', timeOut: null, status: 'Pending Approval', phone: '+1 555-123-4567', duration: null },
-  { id: '5', name: 'FedEx', type: 'Delivery', block: 'D', apt: '112', timeIn: '10:15 AM', timeOut: null, status: 'Inside', phone: '-', duration: null },
+  { id: '5', name: 'FedEx Express', type: 'Delivery', block: 'D', apt: '112', timeIn: '10:15 AM', timeOut: null, status: 'Inside', phone: '+1 800-333-2211', duration: null },
 ];
 
 export const Visitors = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'inside' | 'guest' | 'delivery'>('all');
   const [visitors, setVisitors] = useState(INITIAL_VISITORS);
   
   // Modal State
@@ -36,7 +52,7 @@ export const Visitors = () => {
       if (visitor.id === id) {
         const now = new Date();
         const timeOutStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const mockHrs = Math.floor(Math.random() * 3);
+        const mockHrs = Math.floor(Math.random() * 2);
         const mockMins = Math.floor(Math.random() * 45) + 15;
         const durationStr = mockHrs > 0 ? `${mockHrs}h ${mockMins}m` : `${mockMins}m`;
 
@@ -55,11 +71,9 @@ export const Visitors = () => {
     e.preventDefault();
     setVisitorStatus('waiting');
     
-    // Simulate resident approval taking 2 seconds
     setTimeout(() => {
       setVisitorStatus('approved');
       
-      // Add to table
       const now = new Date();
       const timeInStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
@@ -67,8 +81,8 @@ export const Visitors = () => {
         id: Math.random().toString(),
         name: formData.name || (visitorType === 'Delivery' ? formData.company : 'Unknown'),
         type: visitorType,
-        block: formData.block,
-        apt: formData.apt,
+        block: formData.block || 'A',
+        apt: formData.apt || '101',
         timeIn: timeInStr,
         timeOut: null,
         status: 'Inside',
@@ -78,74 +92,240 @@ export const Visitors = () => {
 
       setVisitors(prev => [newVisitor, ...prev]);
 
-      // Auto close after 1.5 seconds of approval
       setTimeout(() => {
         setIsModalOpen(false);
         setTimeout(() => {
           setVisitorStatus('form');
-          setFormData({ name: '', phone: '', block: '', apt: '', company: '' }); // Reset form
+          setFormData({ name: '', phone: '', block: '', apt: '', company: '' });
         }, 300);
       }, 1500);
     }, 2000);
   };
 
+  const getTypeBadge = (type: string) => {
+    if (type === 'Guest') {
+      return (
+        <span className="inline-flex items-center gap-1 bg-blue-50 text-electric px-2.5 py-1 rounded-full text-xs font-semibold border border-blue-100">
+          <User size={12} /> {type}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full text-xs font-semibold border border-purple-100">
+        <Package size={12} /> {type}
+      </span>
+    );
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Inside':
-        return <span className="bg-success/10 text-success px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit"><CheckCircle2 size={12}/> Inside</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-success px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+            Inside
+          </span>
+        );
       case 'Checked Out':
-        return <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit"><LogOut size={12}/> Checked Out</span>;
+        return (
+          <span className="inline-flex items-center gap-1 bg-gray-100 text-secondary px-2.5 py-1 rounded-full text-xs font-medium border border-border">
+            Checked Out
+          </span>
+        );
       case 'Pending Approval':
-        return <span className="bg-warning/10 text-warning px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit"><Clock size={12}/> Pending</span>;
+        return (
+          <span className="inline-flex items-center gap-1.5 bg-amber-50 text-warning px-2.5 py-1 rounded-full text-xs font-bold border border-amber-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-warning animate-ping"></span>
+            Pending
+          </span>
+        );
       default:
-        return <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold w-fit">{status}</span>;
+        return <span>{status}</span>;
     }
   };
 
-  const getTypeBadge = (type: string) => {
-    return type === 'Guest' 
-      ? <span className="bg-blue-50 text-[#1D4ED8] px-2 py-1 rounded text-xs font-medium border border-blue-100 w-fit">{type}</span>
-      : <span className="bg-purple-50 text-purple-600 px-2 py-1 rounded text-xs font-medium border border-purple-100 w-fit">{type}</span>;
-  };
+  const filteredVisitors = visitors.filter(v => {
+    const matchesSearch = 
+      v.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      v.block.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      v.apt.includes(searchTerm);
 
-  const filteredVisitors = visitors.filter(v => 
-    v.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    v.block.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    if (!matchesSearch) return false;
+    if (activeFilter === 'inside') return v.status === 'Inside';
+    if (activeFilter === 'guest') return v.type === 'Guest';
+    if (activeFilter === 'delivery') return v.type === 'Delivery';
+    return true;
+  });
+
+  const insideCount = visitors.filter(v => v.status === 'Inside').length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      
+      {/* Page Header with Stats Pill */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-navy">Visitor Log</h1>
-          <p className="text-secondary text-sm mt-1">Manage and track all guests and deliveries</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold text-navy">Visitor Log</h1>
+            <span className="bg-emerald-50 text-success border border-emerald-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              {insideCount} Inside
+            </span>
+          </div>
+          <p className="text-secondary text-xs sm:text-sm mt-0.5">Real-time gate pass management and tracking</p>
         </div>
-        <Button className="w-auto px-6 whitespace-nowrap" onClick={() => setIsModalOpen(true)}>
-          New Visitor Entry
+
+        <Button 
+          className="w-full sm:w-auto px-5 py-3 shadow-md shadow-electric/20 flex items-center justify-center gap-2" 
+          onClick={() => setIsModalOpen(true)}
+        >
+          <Plus size={18} />
+          <span>New Visitor Entry</span>
         </Button>
       </div>
 
-      <Card className="p-0 overflow-hidden">
-        {/* Toolbar */}
-        <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-4 justify-between bg-gray-50/50">
-          <div className="relative w-full sm:w-96">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
-            <input 
-              type="text" 
-              placeholder="Search by name or block..." 
-              className="w-full pl-10 pr-4 py-2 bg-white border border-border rounded-lg text-sm focus:outline-none focus:border-[#1D4ED8] transition-colors"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-lg text-sm font-medium text-navy hover:bg-gray-50 transition-colors">
-            <Filter size={16} /> Filters
-          </button>
+      {/* Mobile-Friendly Search and Filter Chips */}
+      <div className="space-y-3">
+        <div className="relative w-full">
+          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary" />
+          <input 
+            type="text" 
+            placeholder="Search by name, flat (e.g. 104) or block..." 
+            className="w-full pl-10 pr-4 py-3 bg-white border border-border rounded-xl text-sm focus:outline-none focus:border-electric focus:ring-2 focus:ring-electric/15 transition-all shadow-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
-        {/* Table */}
-        <div className="w-full overflow-x-auto scroll-smooth pb-2" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
+        {/* Scrollable Filter Chips (Thumb friendly) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              activeFilter === 'all'
+                ? 'bg-navy text-white shadow-sm'
+                : 'bg-white text-secondary border border-border hover:bg-gray-50'
+            }`}
+          >
+            All Visitors ({visitors.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('inside')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              activeFilter === 'inside'
+                ? 'bg-success text-white shadow-sm'
+                : 'bg-white text-secondary border border-border hover:bg-gray-50'
+            }`}
+          >
+            Inside Now ({insideCount})
+          </button>
+          <button
+            onClick={() => setActiveFilter('guest')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              activeFilter === 'guest'
+                ? 'bg-electric text-white shadow-sm'
+                : 'bg-white text-secondary border border-border hover:bg-gray-50'
+            }`}
+          >
+            Guests Only
+          </button>
+          <button
+            onClick={() => setActiveFilter('delivery')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              activeFilter === 'delivery'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'bg-white text-secondary border border-border hover:bg-gray-50'
+            }`}
+          >
+            Deliveries
+          </button>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          MOBILE VIEW: TOUCH-FRIENDLY VISITOR CARDS (for 98% Mobile Users)
+         ========================================================================= */}
+      <div className="block md:hidden space-y-3">
+        {filteredVisitors.map((visitor) => (
+          <div 
+            key={visitor.id} 
+            className="bg-white rounded-2xl p-4 border border-border shadow-sm space-y-3 transition-all active:scale-[0.99]"
+          >
+            {/* Top row: Avatar + Name + Status */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                  visitor.type === 'Delivery' 
+                    ? 'bg-purple-100 text-purple-700' 
+                    : 'bg-blue-100 text-electric'
+                }`}>
+                  {visitor.type === 'Delivery' ? <Package size={20} /> : <User size={20} />}
+                </div>
+                <div>
+                  <h3 className="font-bold text-navy text-sm leading-tight">{visitor.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    {getTypeBadge(visitor.type)}
+                  </div>
+                </div>
+              </div>
+
+              {getStatusBadge(visitor.status)}
+            </div>
+
+            {/* Info Badges */}
+            <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-page text-xs">
+              <div className="flex items-center gap-1.5 text-navy font-semibold">
+                <Home size={14} className="text-secondary shrink-0" />
+                <span>Block {visitor.block} • Apt {visitor.apt}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-secondary justify-end">
+                <Clock size={14} className="shrink-0" />
+                <span>In: {visitor.timeIn}</span>
+              </div>
+            </div>
+
+            {/* Phone & Check Out Action Buttons */}
+            <div className="flex items-center gap-2 pt-1 border-t border-border/60">
+              {visitor.phone && visitor.phone !== '-' && (
+                <a
+                  href={`tel:${visitor.phone}`}
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-border text-navy text-xs font-semibold hover:bg-page transition-colors"
+                >
+                  <Phone size={14} className="text-electric" />
+                  <span>Call</span>
+                </a>
+              )}
+
+              {visitor.status === 'Inside' ? (
+                <button
+                  onClick={() => handleCheckout(visitor.id)}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-navy hover:bg-slate-800 text-white font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <LogOut size={14} />
+                  <span>Mark Check Out</span>
+                </button>
+              ) : (
+                <div className="flex-1 text-right text-xs text-secondary font-medium py-1">
+                  {visitor.duration ? `Duration: ${visitor.duration}` : `Exited at ${visitor.timeOut}`}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {filteredVisitors.length === 0 && (
+          <div className="bg-white rounded-2xl p-8 text-center text-secondary border border-border">
+            <p className="font-semibold text-navy mb-1">No visitors found</p>
+            <p className="text-xs">Try clearing search filters or create a new entry</p>
+          </div>
+        )}
+      </div>
+
+      {/* =========================================================================
+          DESKTOP VIEW: CLEAN DATA TABLE
+         ========================================================================= */}
+      <Card className="hidden md:block p-0 overflow-hidden shadow-sm">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-page text-secondary font-semibold border-b border-border">
               <tr>
                 <th className="px-6 py-4">Visitor Info</th>
@@ -172,7 +352,7 @@ export const Visitors = () => {
                     <div className="flex flex-col gap-0.5">
                       <span className="font-medium text-navy">In: {visitor.timeIn}</span>
                       {visitor.timeOut && <span className="text-xs text-secondary">Out: {visitor.timeOut}</span>}
-                      {visitor.duration && <span className="text-xs font-semibold text-[#1D4ED8] mt-1 bg-blue-50 px-2 py-0.5 rounded w-fit">{visitor.duration}</span>}
+                      {visitor.duration && <span className="text-xs font-semibold text-electric mt-1 bg-blue-50 px-2 py-0.5 rounded w-fit">{visitor.duration}</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">{getStatusBadge(visitor.status)}</td>
@@ -180,44 +360,37 @@ export const Visitors = () => {
                     {visitor.status === 'Inside' ? (
                       <button 
                         onClick={() => handleCheckout(visitor.id)}
-                        className="px-4 py-2 bg-white border border-border text-navy hover:border-[#1D4ED8] hover:text-[#1D4ED8] text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                        className="px-4 py-2 bg-navy hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-95"
                       >
                         Check Out
                       </button>
                     ) : (
-                      <button className="p-2 text-secondary hover:text-navy rounded-lg hover:bg-page transition-colors">
-                        <MoreVertical size={18} />
-                      </button>
+                      <span className="text-xs text-secondary">Completed</span>
                     )}
                   </td>
                 </tr>
               ))}
-              {filteredVisitors.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-secondary">No visitors found.</td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </Card>
 
-      {/* New Visitor Modal */}
+      {/* Mobile-Friendly Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Visitor Entry">
         {visitorStatus === 'form' && (
           <div className="animate-in fade-in">
-            <div className="flex bg-page p-1 rounded-xl mb-6">
+            <div className="flex bg-page p-1 rounded-xl mb-5">
               <button 
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${visitorType === 'Guest' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${visitorType === 'Guest' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
                 onClick={() => setVisitorType('Guest')}
               >
-                Guest / People
+                Guest / Visitor
               </button>
               <button 
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${visitorType === 'Delivery' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${visitorType === 'Delivery' ? 'bg-white shadow-sm text-navy' : 'text-secondary'}`}
                 onClick={() => setVisitorType('Delivery')}
               >
-                Delivery
+                Delivery Rider
               </button>
             </div>
             
@@ -225,15 +398,16 @@ export const Visitors = () => {
               <div className="flex flex-col items-center mb-5">
                 <button 
                   type="button" 
-                  className="w-20 h-20 bg-page border-2 border-dashed border-border rounded-full flex flex-col items-center justify-center text-secondary hover:text-[#1D4ED8] hover:border-[#1D4ED8] hover:bg-[#1D4ED8]/5 transition-colors relative overflow-hidden"
+                  className="w-20 h-20 bg-page border-2 border-dashed border-border rounded-full flex flex-col items-center justify-center text-secondary hover:text-electric hover:border-electric transition-colors"
                 >
-                  <Camera size={24} className="mb-1" />
-                  <span className="text-[10px] font-medium">Add Photo</span>
+                  <Camera size={22} className="mb-1" />
+                  <span className="text-[10px] font-semibold">Take Photo</span>
                 </button>
               </div>
+
               <Input 
-                label="Full Name" 
-                placeholder={visitorType === 'Guest' ? "e.g. John Smith" : "e.g. Amazon Rider"} 
+                label="Full Name / Rider Name" 
+                placeholder={visitorType === 'Guest' ? "e.g. John Smith" : "e.g. Amazon / Rahul"} 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 required 
@@ -251,7 +425,7 @@ export const Visitors = () => {
                 <div>
                   <label className="block text-[13px] font-medium text-navy mb-1.5">Block</label>
                   <select 
-                    className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-[#1D4ED8] transition-all" 
+                    className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-electric transition-all" 
                     required 
                     value={formData.block}
                     onChange={(e) => setFormData({...formData, block: e.target.value})}
@@ -266,14 +440,14 @@ export const Visitors = () => {
                 <div>
                   <label className="block text-[13px] font-medium text-navy mb-1.5">Apartment</label>
                   <select 
-                    className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-[#1D4ED8] transition-all" 
+                    className="w-full bg-page border border-border rounded-xl px-4 py-3 text-[14px] text-text focus:outline-none focus:border-electric transition-all" 
                     required 
                     value={formData.apt}
                     onChange={(e) => setFormData({...formData, apt: e.target.value})}
                   >
                     <option value="" disabled>Select Flat</option>
                     <option value="101">101</option>
-                    <option value="102">102</option>
+                    <option value="104">104</option>
                     <option value="201">201</option>
                     <option value="202">202</option>
                     <option value="301">301</option>
@@ -287,13 +461,15 @@ export const Visitors = () => {
               {visitorType === 'Delivery' && (
                 <Input 
                   label="Company / Service" 
-                  placeholder="e.g. Amazon, Swiggy, Uber" 
+                  placeholder="e.g. Amazon, FedEx, Swiggy" 
                   value={formData.company}
                   onChange={(e) => setFormData({...formData, company: e.target.value})}
                   required 
                 />
               )}
-              <Button type="submit" className="mt-4">Send Approval Request</Button>
+              <Button type="submit" className="mt-4 w-full py-3.5 text-base shadow-lg shadow-electric/25">
+                Send Gate Approval Request
+              </Button>
             </form>
           </div>
         )}
@@ -301,9 +477,9 @@ export const Visitors = () => {
         {visitorStatus === 'waiting' && (
           <div className="flex flex-col items-center py-10 animate-in fade-in">
             <Clock size={48} className="text-warning animate-spin mb-4" />
-            <h3 className="text-lg font-bold text-navy mb-2">Waiting for Approval</h3>
+            <h3 className="text-lg font-bold text-navy mb-2">Pinging Resident...</h3>
             <p className="text-sm text-secondary text-center px-6">
-              Request sent to resident. Please wait.
+              Instant notification sent to the resident app. Awaiting gate approval response.
             </p>
           </div>
         )}
@@ -313,7 +489,8 @@ export const Visitors = () => {
             <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4 border border-success/20 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
               <ShieldCheck size={40} className="text-success" />
             </div>
-            <h3 className="text-[22px] font-bold text-success mb-2">Request Approved!</h3>
+            <h3 className="text-2xl font-bold text-success mb-1">Gate Pass Approved!</h3>
+            <p className="text-xs text-secondary">Gate barrier opened • Visitor logged</p>
           </div>
         )}
       </Modal>
