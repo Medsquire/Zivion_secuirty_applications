@@ -28,71 +28,58 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-page font-sans">
-      {/* Left Panel - Branding & Image */}
-      <div className="w-full md:w-1/2 relative flex flex-col justify-between p-8 md:p-16 text-white overflow-hidden min-h-[500px] md:min-h-screen">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80")' }}
-        ></div>
-        <div className="absolute inset-0 z-0 bg-navy/90 backdrop-blur-[2px]"></div>
+    <div
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-cover bg-center px-4 py-6 font-sans md:justify-end md:px-[7vw] md:py-10"
+      style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80")' }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-navy/75 via-navy/45 to-navy/35" />
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col h-full justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-16 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="bg-white/10 p-2 rounded-lg">
-                <Building2 size={32} className="text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold tracking-wide leading-none mb-1">ZIVION</span>
-                <span className="text-xs font-medium text-white/80">Apartment Gate Security</span>
-              </div>
+      <div className="absolute inset-y-0 left-[7vw] z-10 hidden w-[42vw] flex-col justify-between py-14 text-white md:flex">
+        <div>
+          <div className="mb-16 flex cursor-pointer items-center gap-3" onClick={() => navigate('/')}>
+            <div className="rounded-lg bg-white/10 p-2">
+              <Building2 size={32} className="text-white" />
             </div>
-
-            <div className="max-w-md">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-[1.15]">
-                Secure Entrance.<br />Safer Community.
-              </h1>
-              <p className="text-lg text-white/80 leading-relaxed">
-                Helping security guards manage visitors, vehicles and access — all in one place.
-              </p>
+            <div className="flex flex-col">
+              <span className="mb-1 text-2xl font-bold leading-none tracking-wide">ZIVION</span>
+              <span className="text-xs font-medium text-white/80">Apartment Gate Security</span>
             </div>
           </div>
 
-          {/* Feature Icons Grid */}
-          <div className="grid grid-cols-4 gap-4 mt-16 pt-8 border-t border-white/20">
-            <div className="flex flex-col items-center text-center">
-              <Users size={28} className="mb-3 text-white/90" />
-              <span className="text-[11px] font-medium text-white/80">Visitor<br/>Management</span>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Car size={28} className="mb-3 text-white/90" />
-              <span className="text-[11px] font-medium text-white/80">Vehicle<br/>Entry</span>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Package size={28} className="mb-3 text-white/90" />
-              <span className="text-[11px] font-medium text-white/80">Delivery<br/>Management</span>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Shield size={28} className="mb-3 text-white/90" />
-              <span className="text-[11px] font-medium text-white/80">Real-time<br/>Security</span>
-            </div>
+          <div className="max-w-md">
+            <h1 className="mb-6 text-4xl font-bold leading-[1.15] text-white lg:text-5xl">
+              Secure Entrance.<br />Safer Community.
+            </h1>
+            <p className="text-lg leading-relaxed text-white/80">
+              Helping security guards manage visitors, vehicles and access — all in one place.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-4 border-t border-white/20 pt-8">
+          <div className="flex flex-col items-center text-center">
+            <Users size={28} className="mb-3 text-white/90" />
+            <span className="text-[11px] font-medium text-white/80">Visitor<br />Management</span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <Car size={28} className="mb-3 text-white/90" />
+            <span className="text-[11px] font-medium text-white/80">Vehicle<br />Entry</span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <Package size={28} className="mb-3 text-white/90" />
+            <span className="text-[11px] font-medium text-white/80">Delivery<br />Management</span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <Shield size={28} className="mb-3 text-white/90" />
+            <span className="text-[11px] font-medium text-white/80">Real-time<br />Security</span>
           </div>
         </div>
       </div>
 
-      {/* Right Panel - Login Form */}
-      <div className="w-full md:w-1/2 relative flex items-center justify-center p-6 md:p-12 bg-[#F8FAFC] overflow-hidden">
-        {/* Subtle Background Shapes */}
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-blue-100/50 mix-blend-multiply blur-3xl"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-100/50 mix-blend-multiply blur-3xl"></div>
-
-        <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-12 relative z-10">
+      <div className="relative z-10 flex w-full items-center justify-center md:w-[min(46vw,520px)]">
+        <div className="w-full max-w-[480px] rounded-2xl bg-white p-7 shadow-2xl ring-1 ring-black/5 sm:p-8 md:p-10">
           
-          {/* Logo inside card (Visible primarily on mobile, but matches design) */}
-          <div className="flex items-center gap-3 mb-10 justify-center">
+          <div className="mb-8 flex items-center justify-center gap-3 md:hidden">
             <Building2 size={36} className="text-[#1D4ED8]" />
             <div className="flex flex-col">
               <span className="text-3xl font-bold tracking-wide leading-none text-navy mb-1">ZIVION</span>
