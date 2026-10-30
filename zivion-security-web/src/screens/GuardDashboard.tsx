@@ -1398,10 +1398,12 @@ export const GuardDashboard = () => {
         </div>
       )}
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Confirmation Modal - Full Width Bottom Sheet on Mobile */}
       {logoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full text-center space-y-4 shadow-2xl animate-in zoom-in-95">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-navy/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 w-full sm:max-w-md text-center space-y-4 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 pb-8 sm:pb-7">
+            {/* Grab handle for mobile */}
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto sm:hidden -mt-1 mb-2" />
             <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">
               <LogOut size={26} className="stroke-[2]" />
             </div>
@@ -1428,7 +1430,7 @@ export const GuardDashboard = () => {
             <div className="space-y-2 pt-1">
               <button
                 onClick={handleConfirmLogout}
-                className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black transition-colors"
+                className="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black transition-colors shadow-md shadow-rose-600/20"
               >
                 Log Out & Exit to Login
               </button>
