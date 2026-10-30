@@ -1021,7 +1021,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
 
                 <View style={styles.hierarchyStep}>
                   <Text style={styles.stepLabel}>2. Select Block</Text>
-                  <View style={styles.pillsRow}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScrollContent}>
                     {BLOCKS.map(blk => (
                       <TouchableOpacity
                         key={blk}
@@ -1034,12 +1034,12 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                         </Text>
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </ScrollView>
                 </View>
 
                 <View style={styles.hierarchyStep}>
                   <Text style={styles.stepLabel}>3. Select Floor</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScrollContent}>
                     {FLOORS.map(flr => (
                       <TouchableOpacity
                         key={flr}
@@ -1057,7 +1057,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
 
                 <View style={styles.hierarchyStep}>
                   <Text style={styles.stepLabel}>4. Select Flat / Door</Text>
-                  <View style={styles.flatGrid}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScrollContent}>
                     {['101', '102', '103', '104', '201', '202', '203', '204', '301', '302'].map(flt => (
                       <TouchableOpacity
                         key={flt}
@@ -1070,7 +1070,7 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                         </Text>
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </ScrollView>
                 </View>
 
                 <View style={styles.linkedResidentBox}>
@@ -2456,6 +2456,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 6,
+    marginRight: 6,
+  },
+  horizontalScrollContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 2,
   },
   flatPillActive: {
     backgroundColor: '#2563EB',

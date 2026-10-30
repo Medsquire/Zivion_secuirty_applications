@@ -164,7 +164,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           {/* Quick Demo Logins Selector */}
           <View style={styles.quickLoginsSection}>
             <Text style={styles.quickLoginsLabel}>QUICK LOGINS:</Text>
-            <View style={styles.quickLoginsRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.quickLoginsRow}
+            >
               <TouchableOpacity
                 style={[
                   styles.quickLoginChip,
@@ -187,8 +191,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 </Text>
               </TouchableOpacity>
 
-              
-            </View>
+              <TouchableOpacity
+                style={[
+                  styles.quickLoginChip,
+                  detectedRole === 'supervisor' && styles.activeSupervisorChip,
+                ]}
+                onPress={() => fillQuickLogin('supervisor')}
+                activeOpacity={0.8}
+              >
+                <UserCheck
+                  size={15}
+                  color={detectedRole === 'supervisor' ? '#4F46E5' : '#64748B'}
+                />
+                <Text
+                  style={[
+                    styles.quickLoginChipText,
+                    detectedRole === 'supervisor' && styles.activeSupervisorChipText,
+                  ]}
+                >
+                  Supervisor (9876543211)
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
 
           {/* Form Inputs */}
