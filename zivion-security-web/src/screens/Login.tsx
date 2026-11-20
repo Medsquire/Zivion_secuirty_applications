@@ -37,8 +37,8 @@ export const Login = () => {
       <div className="absolute inset-y-0 left-[7vw] z-10 hidden w-[42vw] flex-col justify-between py-14 text-white md:flex">
         <div>
           <div className="mb-16 flex cursor-pointer items-center gap-3" onClick={() => navigate('/')}>
-            <div className="rounded-lg bg-white/10 p-2">
-              <Building2 size={32} className="text-white" />
+            <div className="rounded-xl overflow-hidden w-12 h-12 bg-white/10 p-1 border border-white/20">
+              <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover rounded-lg" />
             </div>
             <div className="flex flex-col">
               <span className="mb-1 text-2xl font-bold leading-none tracking-wide">ZIVION</span>
@@ -80,7 +80,9 @@ export const Login = () => {
         <div className="w-full max-w-[480px] rounded-2xl bg-white p-7 shadow-2xl ring-1 ring-black/5 sm:p-8 md:p-10">
           
           <div className="mb-8 flex items-center justify-center gap-3 md:hidden">
-            <Building2 size={36} className="text-[#1D4ED8]" />
+            <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200">
+              <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+            </div>
             <div className="flex flex-col">
               <span className="text-3xl font-bold tracking-wide leading-none text-navy mb-1">ZIVION</span>
               <span className="text-xs font-medium text-secondary">Apartment Gate Security</span>

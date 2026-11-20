@@ -4,6 +4,7 @@ import { Login } from './screens/Login';
 import { GuardDashboard } from './screens/GuardDashboard';
 import { Visitors } from './screens/Visitors';
 import { Vehicles } from './screens/Vehicles';
+import { Supervisor } from './screens/Supervisor';
 import { Layout } from './components/Layout';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
                 <Route path="/" element={<GuardDashboard />} />
                 <Route path="/visitors" element={<Visitors />} />
                 <Route path="/vehicles" element={<Vehicles />} />
+                <Route path="/supervisor" element={<Supervisor />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </Layout>

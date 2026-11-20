@@ -429,7 +429,7 @@ export const GuardDashboard = () => {
     <div className="space-y-6 font-sans text-navy max-w-6xl mx-auto pb-16">
       
       {/* 2-Page Navigation Switcher Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2 rounded-2xl border border-slate-200/90 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glass-dock p-2 rounded-2xl shadow-xs">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentScreen('otp')}
@@ -482,7 +482,7 @@ export const GuardDashboard = () => {
           FIRST SCREEN: NO OVERVIEW • DIRECT OTP & SMALL SCAN & SUBMIT
          ========================================================================= */}
       {currentScreen === 'otp' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm max-w-lg mx-auto text-center space-y-6">
+        <div className="glass-stat-white rounded-3xl p-6 sm:p-8 max-w-lg mx-auto text-center space-y-6">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200 shadow-xs">
             <KeyRound size={26} className="stroke-[1.75]" />
           </div>
@@ -647,7 +647,7 @@ export const GuardDashboard = () => {
 
             <button
               onClick={() => setVehicleModalOpen(true)}
-              className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 text-left transition-all active:scale-[0.99] shadow-xs group"
+              className="flex items-center gap-3.5 p-4 rounded-2xl glass-stat-white hover:border-emerald-300 text-left transition-all active:scale-[0.99] group"
             >
               <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs shrink-0 border border-emerald-100 group-hover:scale-105 transition-transform">
                 <CarFront size={24} className="stroke-[1.75]" />
@@ -666,7 +666,7 @@ export const GuardDashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           
           {/* The 3 Status Tabs: PENDING | IN | OUT */}
-          <div className="flex items-center bg-white p-1 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex items-center glass-dock p-1 rounded-2xl">
             
             {/* 1. PENDING */}
             <button
@@ -717,7 +717,7 @@ export const GuardDashboard = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search flat, name, plate..."
-              className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3.5 py-2 text-xs font-medium text-navy placeholder:text-secondary/60 focus:outline-none focus:border-electric transition-colors"
+              className="w-full glass-input rounded-xl pl-9 pr-3.5 py-2 text-xs font-medium text-navy placeholder:text-secondary/60 focus:outline-none focus:border-electric transition-colors"
             />
           </div>
 
@@ -730,7 +730,7 @@ export const GuardDashboard = () => {
             return (
               <div
                 key={entry.id}
-                className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs hover:shadow-sm transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="glass-stat-white rounded-2xl p-4 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 {/* Left: Avatar / Photo + Details */}
                 <div className="flex items-center gap-3.5 min-w-0">
@@ -850,7 +850,7 @@ export const GuardDashboard = () => {
           })}
 
           {filteredList.length === 0 && (
-            <div className="bg-white rounded-3xl p-12 text-center text-secondary border border-slate-200/80">
+            <div className="glass-stat-white rounded-3xl p-12 text-center text-secondary">
               <CheckCircle2 size={40} className="mx-auto text-electric/40 mb-2 stroke-[1.5]" />
               <p className="text-sm font-bold text-navy">
                 {activeQueue === 'pending' ? 'No pending requests' : activeQueue === 'in' ? 'No visitors currently inside' : 'No checkout history today'}
@@ -869,7 +869,7 @@ export const GuardDashboard = () => {
          ========================================================================= */}
       {visitorModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-navy/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-lg rounded-3xl bg-white border border-slate-200 p-5 sm:p-6 shadow-2xl animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
+          <div className="w-full max-w-lg rounded-3xl glass-stat-white p-5 sm:p-6 shadow-2xl animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4">
@@ -1106,7 +1106,7 @@ export const GuardDashboard = () => {
          ========================================================================= */}
       {otpModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-navy/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-white border border-slate-200 p-6 text-center space-y-4 shadow-2xl animate-in zoom-in-95">
+          <div className="w-full max-w-sm rounded-3xl glass-stat-white p-6 text-center space-y-4 shadow-2xl animate-in zoom-in-95">
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1225,7 +1225,7 @@ export const GuardDashboard = () => {
          ========================================================================= */}
       {vehicleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-navy/60 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 p-5 sm:p-6 shadow-2xl animate-in zoom-in-95">
+          <div className="w-full max-w-md rounded-3xl glass-stat-white p-5 sm:p-6 shadow-2xl animate-in zoom-in-95">
             
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2.5">
@@ -1312,7 +1312,7 @@ export const GuardDashboard = () => {
          ========================================================================= */}
       {supervisorDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-navy/50 backdrop-blur-xs animate-in fade-in">
-          <div className="w-full max-w-md bg-white h-full shadow-2xl p-6 flex flex-col justify-between animate-in slide-in-from-right">
+          <div className="w-full max-w-md glass-stat-white h-full shadow-2xl p-6 flex flex-col justify-between animate-in slide-in-from-right">
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
                 <div className="flex items-center gap-2.5">
@@ -1401,7 +1401,7 @@ export const GuardDashboard = () => {
       {/* Logout Confirmation Modal - Full Width Bottom Sheet on Mobile */}
       {logoutModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-navy/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 w-full sm:max-w-md text-center space-y-4 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 pb-8 sm:pb-7">
+          <div className="glass-stat-white rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 w-full sm:max-w-md text-center space-y-4 shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 pb-8 sm:pb-7">
             {/* Grab handle for mobile */}
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto sm:hidden -mt-1 mb-2" />
             <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">

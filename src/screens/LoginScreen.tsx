@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  Image,
   ImageBackground,
   SafeAreaView,
   ScrollView,
@@ -8,24 +9,19 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useWindowDimensions,
   Platform,
   StatusBar,
   KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  Shield,
   Phone,
-  Lock,
-  Eye,
-  EyeOff,
   ArrowRight,
-  ShieldCheck,
-  UserCheck,
+  ArrowLeft,
   AlertCircle,
+  RefreshCw,
+  CheckCircle2,
 } from 'lucide-react-native';
-import { colors, gradients } from '../theme/colors';
 
 interface LoginScreenProps {
   navigation: {
@@ -33,441 +29,416 @@ interface LoginScreenProps {
   };
 }
 
-type RoleType = 'guard' | 'supervisor';
-
-// Registered phone numbers mapping
-const KNOWN_ACCOUNTS: Record<string, { role: RoleType; name: string; pass: string }> = {
-  '9876543210': { role: 'guard', name: 'Security Guard', pass: 'guard123' },
-  '9876543211': { role: 'supervisor', name: 'Shift Supervisor', pass: 'super123' },
-};
-
-const buildingImage =
-  'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80';
+type AuthStep = 'phone' | 'otp';
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const { width } = useWindowDimensions();
-  const isWideScreen = width >= 900;
-
-  const [phoneNumber, setPhoneNumber] = useState('9876543210');
-  const [password, setPassword] = useState('guard123');
-  const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState<AuthStep>('phone');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [resendTimer, setResendTimer] = useState(30);
 
-  // Automatically determine role based on phone number
-  const detectedAccount = KNOWN_ACCOUNTS[phoneNumber];
-  // If registered, use registered role; otherwise determine by rule or default to guard
-  const detectedRole: RoleType = detectedAccount
-    ? detectedAccount.role
-    : phoneNumber.endsWith('1')
-      ? 'supervisor'
-      : 'guard';
+  // Resend Countdown Timer
+  useEffect(() => {
+    let interval: any = null;
+    if (step === 'otp' && resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [step, resendTimer]);
 
   const handlePhoneChange = (text: string) => {
-    // Keep only digits, max 10
     const cleaned = text.replace(/[^0-9]/g, '').slice(0, 10);
     setPhoneNumber(cleaned);
     setErrorMessage('');
-
-    // If matches a known demo number, auto-set default password for convenience
-    if (KNOWN_ACCOUNTS[cleaned]) {
-      setPassword(KNOWN_ACCOUNTS[cleaned].pass);
-    }
   };
 
-  const fillQuickLogin = (role: RoleType) => {
-    if (role === 'guard') {
-      setPhoneNumber('9876543210');
-      setPassword('guard123');
-    } else {
-      setPhoneNumber('9876543211');
-      setPassword('super123');
-    }
+  const handleOtpChange = (text: string) => {
+    const cleaned = text.replace(/[^0-9]/g, '').slice(0, 6);
+    setOtp(cleaned);
     setErrorMessage('');
   };
 
-  const handleLogin = () => {
+  // Step 1: Send OTP
+  const handleSendOtp = () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       setErrorMessage('Please enter a valid 10-digit mobile number');
       return;
     }
-    if (!password) {
-      setErrorMessage('Please enter your password');
+    setErrorMessage('');
+    setOtp('');
+    setResendTimer(30);
+    setStep('otp');
+  };
+
+  // Step 2: Verify OTP & Login
+  const handleVerifyOtp = () => {
+    if (!otp || otp.length < 6) {
+      setErrorMessage('Please enter the complete 6-digit OTP');
+      return;
+    }
+
+    if (otp !== '123456') {
+      setErrorMessage('Invalid OTP. Please enter 123456');
       return;
     }
 
     setErrorMessage('');
-    if (detectedRole === 'supervisor') {
+
+    // Determine target role:
+    // Numbers ending with '1' (e.g. 9876543211) navigate to Supervisor Console;
+    // other numbers navigate to Guard Console.
+    if (phoneNumber.endsWith('1')) {
       navigation.navigate('SupervisorDashboard');
     } else {
       navigation.navigate('GuardDashboard');
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.keyboardContainer}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContainer,
-          isWideScreen ? styles.wideScrollContainer : styles.narrowScrollContainer,
-        ]}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        bounces={true}
-      >
-        {/* Top Image Hero Banner */}
-        <ImageBackground
-          source={{ uri: buildingImage }}
-          resizeMode="cover"
-          style={[styles.heroBanner, isWideScreen && styles.wideHeroBanner]}
+  const handleResendOtp = () => {
+    if (resendTimer > 0) return;
+    setResendTimer(30);
+    setOtp('');
+    setErrorMessage('');
+  };
+
+  // Helper to render 6 visual OTP boxes
+  const renderOtpBoxes = () => {
+    const digits = otp.split('');
+    const boxes = [];
+    for (let i = 0; i < 6; i++) {
+      const isCurrent = i === digits.length;
+      const isFilled = i < digits.length;
+      boxes.push(
+        <View
+          key={i}
+          style={[
+            styles.otpBox,
+            isCurrent && styles.otpBoxCurrent,
+            isFilled && styles.otpBoxFilled,
+          ]}
         >
-          <LinearGradient
-            colors={['rgba(6, 11, 20, 0.45)', 'rgba(6, 11, 20, 0.85)']}
-            style={styles.heroGradient}
-          />
-          <SafeAreaView style={styles.heroSafeArea}>
-            <View style={styles.heroContent}>
-              <View style={styles.brandBadge}>
-                <LinearGradient
-                  colors={gradients.primary}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.brandIconBox}
-                >
-                  <Shield color="#FFFFFF" size={24} />
-                </LinearGradient>
-                <View>
-                  <Text style={styles.brandTitle}>Bee SECURITY</Text>
-                  <Text style={styles.brandSubtitle}></Text>
-                </View>
-              </View>
-            </View>
-          </SafeAreaView>
-        </ImageBackground>
-
-        {/* Form Card (Below the Image) */}
-        <View style={[styles.formCard, isWideScreen && styles.wideFormCard]}>
-          {/* Subtle Top Handle */}
-          <View style={styles.handleContainer}>
-            <View style={styles.handle} />
-          </View>
-
-          {/* Title */}
-          <Text style={styles.formTitle}>Sign In</Text>
-          <Text style={styles.formSubtitle}>
-            
-          </Text>
-
-          {/* Quick Demo Logins Selector */}
-          <View style={styles.quickLoginsSection}>
-            <Text style={styles.quickLoginsLabel}>QUICK LOGINS:</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.quickLoginsRow}
-            >
-              <TouchableOpacity
-                style={[
-                  styles.quickLoginChip,
-                  detectedRole === 'guard' && styles.activeGuardChip,
-                ]}
-                onPress={() => fillQuickLogin('guard')}
-                activeOpacity={0.8}
-              >
-                <ShieldCheck
-                  size={15}
-                  color={detectedRole === 'guard' ? '#2563EB' : '#64748B'}
-                />
-                <Text
-                  style={[
-                    styles.quickLoginChipText,
-                    detectedRole === 'guard' && styles.activeGuardChipText,
-                  ]}
-                >
-                  Guard (9876543210)
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.quickLoginChip,
-                  detectedRole === 'supervisor' && styles.activeSupervisorChip,
-                ]}
-                onPress={() => fillQuickLogin('supervisor')}
-                activeOpacity={0.8}
-              >
-                <UserCheck
-                  size={15}
-                  color={detectedRole === 'supervisor' ? '#4F46E5' : '#64748B'}
-                />
-                <Text
-                  style={[
-                    styles.quickLoginChipText,
-                    detectedRole === 'supervisor' && styles.activeSupervisorChipText,
-                  ]}
-                >
-                  Supervisor (9876543211)
-                </Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-
-          {/* Form Inputs */}
-          <View style={styles.inputsSection}>
-            {/* Phone Number Field (Marked required with *) */}
-            <View style={styles.fieldGroup}>
-              <View style={styles.labelRow}>
-                <Text style={styles.fieldLabel}>
-                  Phone Number <Text style={styles.requiredMark}>*</Text>
-                </Text>
-                {/* Dynamically Detected Role Badge */}
-                {phoneNumber.length >= 10 && (
-                  <View
-                    style={[
-                      styles.detectedBadge,
-                      detectedRole === 'supervisor'
-                        ? styles.supervisorBadge
-                        : styles.guardBadge,
-                    ]}
-                  >
-                    {detectedRole === 'supervisor' ? (
-                      <UserCheck size={12} color="#4F46E5" />
-                    ) : (
-                      <ShieldCheck size={12} color="#2563EB" />
-                    )}
-                    <Text
-                      style={[
-                        styles.detectedBadgeText,
-                        detectedRole === 'supervisor'
-                          ? styles.supervisorBadgeText
-                          : styles.guardBadgeText,
-                      ]}
-                    >
-                      {detectedRole === 'supervisor'
-                        ? 'Supervisor Account'
-                        : 'Guard Account'}
-                    </Text>
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <View style={styles.countryCodeBox}>
-                  <Phone size={18} color="#64748B" />
-                  <Text style={styles.countryCodeText}>+91</Text>
-                </View>
-                <View style={styles.inputDivider} />
-                <TextInput
-                  style={styles.textInput}
-                  value={phoneNumber}
-                  onChangeText={handlePhoneChange}
-                  placeholder="Enter 10-digit mobile number"
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                />
-              </View>
-            </View>
-
-            {/* Password Field (Marked required with *) */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>
-                Password <Text style={styles.requiredMark}>*</Text>
-              </Text>
-              <View style={styles.inputContainer}>
-                <View style={styles.inputIconBox}>
-                  <Lock size={18} color="#64748B" />
-                </View>
-                <TextInput
-                  style={styles.textInput}
-                  value={password}
-                  onChangeText={(val) => {
-                    setPassword(val);
-                    setErrorMessage('');
-                  }}
-                  placeholder="Enter password"
-                  placeholderTextColor="#94A3B8"
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                  activeOpacity={0.7}
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} color="#64748B" />
-                  ) : (
-                    <Eye size={18} color="#64748B" />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Error Message */}
-            {errorMessage ? (
-              <View style={styles.errorContainer}>
-                <AlertCircle size={15} color="#EF4444" />
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            ) : null}
-
-            {/* Forgot Password Link */}
-            <TouchableOpacity style={styles.forgotRow} activeOpacity={0.7}>
-              <Text style={styles.forgotText}>Forgot password?</Text>
-            </TouchableOpacity>
-
-            {/* Dynamic Login Button based on detected role */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={handleLogin}
-              style={styles.loginButtonWrapper}
-            >
-              <LinearGradient
-                colors={
-                  detectedRole === 'supervisor'
-                    ? ['#4F46E5', '#06B6D4']
-                    : ['#2563EB', '#0EA5E9']
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.loginButtonGradient}
-              >
-                <Text style={styles.loginButtonText}>
-                  Login as {detectedRole === 'supervisor' ? 'Supervisor' : 'Security Guard'}
-                </Text>
-                <View style={styles.loginButtonArrow}>
-                  <ArrowRight size={18} color="#FFFFFF" />
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-
-          {/* Minimal Security Footer */}
-          <View style={styles.footer}>
-            <View style={styles.secureBadge}>
-              <Lock size={12} color="#94A3B8" />
-              <Text style={styles.secureBadgeText}>Encrypted Gate Terminal Access</Text>
-            </View>
-            <Text style={styles.footerCopy}>ZIVION Security · 24/7 Access</Text>
-          </View>
+          <Text style={styles.otpBoxDigit}>{digits[i] || ''}</Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      );
+    }
+    return <View style={styles.otpBoxesRow}>{boxes}</View>;
+  };
+
+  return (
+    <ImageBackground
+      source={require('../assets/apartment-gate-bg.jpg')}
+      resizeMode="cover"
+      style={styles.fullScreenBackground}
+    >
+      <LinearGradient
+        colors={[
+          'rgba(15, 23, 42, 0.38)',
+          'rgba(15, 23, 42, 0.58)',
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.gradientOverlay}
+      >
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <SafeAreaView style={styles.safeArea}>
+          <KeyboardAvoidingView
+            style={styles.keyboardContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContainer}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.contentWrapper}>
+                {/* Logo directly above the card only */}
+                {/* Logo directly above the card only - Icon Only */}
+                <View style={styles.brandHeader}>
+                  <View style={styles.brandIconBox}>
+                    <Image
+                      source={require('../assets/logo.jpg')}
+                      style={styles.brandLogoImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                </View>
+
+                {/* Form Card (Frosted Glass Container) */}
+                <View style={styles.formCard}>
+                  {/* =============================================================== */}
+                  {/* STEP 1: PHONE NUMBER INPUT */}
+                  {/* =============================================================== */}
+                  {step === 'phone' ? (
+                    <View>
+                      <Text style={styles.formTitle}>Sign In</Text>
+
+
+                      <View style={styles.inputsSection}>
+                        {/* Phone Number Field */}
+                        <View style={styles.fieldGroup}>
+                          <Text style={styles.fieldLabel}>
+                            Phone Number <Text style={styles.requiredMark}>*</Text>
+                          </Text>
+                          <View style={styles.inputContainer}>
+                            <View style={styles.countryCodeBox}>
+                              <Phone size={19} color="#2563EB" />
+                            </View>
+                            <View style={styles.inputDivider} />
+                            <TextInput
+                              style={styles.textInput}
+                              value={phoneNumber}
+                              onChangeText={handlePhoneChange}
+                              placeholder="Enter 10-digit mobile number"
+                              placeholderTextColor="#94A3B8"
+                              keyboardType="phone-pad"
+                              maxLength={10}
+                              autoFocus={true}
+                            />
+                          </View>
+                        </View>
+
+                        {/* Error Message */}
+                        {errorMessage ? (
+                          <View style={styles.errorContainer}>
+                            <AlertCircle size={15} color="#EF4444" />
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                          </View>
+                        ) : null}
+
+                        {/* Send OTP Button */}
+                        <TouchableOpacity
+                          activeOpacity={0.85}
+                          onPress={handleSendOtp}
+                          style={styles.primaryBtnWrapper}
+                        >
+                          <LinearGradient
+                            colors={['#2563EB', '#0EA5E9']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.primaryBtnGradient}
+                          >
+                            <Text style={styles.primaryBtnText}>Send OTP</Text>
+                            <View style={styles.primaryBtnIconBox}>
+                              <ArrowRight size={18} color="#FFFFFF" />
+                            </View>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    /* =============================================================== */
+                    /* STEP 2: ENTER OTP (OTP = 123456) */
+                    /* =============================================================== */
+                    <View>
+                      <View style={styles.otpHeaderRow}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setStep('phone');
+                            setOtp('');
+                            setErrorMessage('');
+                          }}
+                          style={styles.backToPhoneBtn}
+                          activeOpacity={0.7}
+                        >
+                          <ArrowLeft size={18} color="#2563EB" />
+                        </TouchableOpacity>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.formTitle}>Verify OTP</Text>
+                          <Text style={styles.formSubtitle}>
+                            Sent to <Text style={styles.boldPhoneText}>+91 {phoneNumber}</Text>
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.inputsSection}>
+                        {/* 6-Box OTP Display with overlaid invisible input */}
+                        <View style={styles.otpInputWrapper}>
+                          {renderOtpBoxes()}
+                          <TextInput
+                            style={styles.hiddenTextInput}
+                            value={otp}
+                            onChangeText={handleOtpChange}
+                            keyboardType="number-pad"
+                            maxLength={6}
+                            autoFocus={true}
+                          />
+                        </View>
+
+                        {/* Error Message */}
+                        {errorMessage ? (
+                          <View style={styles.errorContainer}>
+                            <AlertCircle size={15} color="#EF4444" />
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                          </View>
+                        ) : null}
+
+                        {/* Resend OTP Row */}
+                        <View style={styles.resendRow}>
+                          {resendTimer > 0 ? (
+                            <Text style={styles.resendTimerText}>
+                              Resend OTP in <Text style={styles.timerBold}>{resendTimer}s</Text>
+                            </Text>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={handleResendOtp}
+                              style={styles.resendBtn}
+                              activeOpacity={0.7}
+                            >
+                              <RefreshCw size={13} color="#2563EB" />
+                              <Text style={styles.resendBtnText}>Resend OTP</Text>
+                            </TouchableOpacity>
+                          )}
+
+                          <TouchableOpacity
+                            onPress={() => {
+                              setStep('phone');
+                              setOtp('');
+                              setErrorMessage('');
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={styles.changeNumberText}>Edit Phone Number</Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        {/* Verify & Login Button */}
+                        <TouchableOpacity
+                          activeOpacity={0.85}
+                          onPress={handleVerifyOtp}
+                          style={styles.primaryBtnWrapper}
+                        >
+                          <LinearGradient
+                            colors={['#2563EB', '#0EA5E9']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.primaryBtnGradient}
+                          >
+                            <Text style={styles.primaryBtnText}>Verify & Login</Text>
+                            <View style={styles.primaryBtnIconBox}>
+                              <CheckCircle2 size={18} color="#FFFFFF" />
+                            </View>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </LinearGradient>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  fullScreenBackground: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  gradientOverlay: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
   keyboardContainer: {
     flex: 1,
-    backgroundColor: '#060B14',
   },
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#060B14',
-  },
-  wideScrollContainer: {
-    flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 40,
-    gap: 40,
+    paddingHorizontal: 0,
+    paddingTop: 40,
+    paddingBottom: 0,
   },
-  narrowScrollContainer: {
-    justifyContent: 'flex-start',
+  contentWrapper: {
+    width: '100%',
+    maxWidth: 460,
   },
 
-  // Hero Banner (Top)
-  heroBanner: {
-    width: '100%',
-    height: 210,
-    justifyContent: 'flex-end',
-  },
-  wideHeroBanner: {
-    width: 420,
-    height: 520,
-    borderRadius: 24,
-    overflow: 'hidden',
-    justifyContent: 'center',
-  },
-  heroGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  heroSafeArea: {
-    width: '100%',
-  },
-  heroContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 34,
-  },
-  brandBadge: {
+  // Brand Logo Header (Directly Above the Card Only)
+  brandHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    marginBottom: 16,
+    paddingHorizontal: 24,
   },
   brandIconBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.cyanBlue,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.30,
+    shadowRadius: 14,
     elevation: 6,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  brandLogoImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
   },
   brandTitle: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '900',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   brandSubtitle: {
-    color: 'rgba(255, 255, 255, 0.75)',
+    color: '#93C5FD',
     fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.4,
     marginTop: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 
-  // Form Card (Below the Image)
+  // Form Card (Frosted Glass Container Docked at Bottom)
   formCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -22,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 28,
+    paddingTop: 26,
+    paddingBottom: Platform.OS === 'ios' ? 44 : 32,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 18,
-    elevation: 16,
-  },
-  wideFormCard: {
-    flex: 0,
-    width: 440,
-    marginTop: 0,
-    borderRadius: 24,
-    paddingVertical: 32,
-  },
-  handleContainer: {
-    alignItems: 'center',
-    paddingVertical: 8,
-    marginBottom: 4,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#E2E8F0',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 30,
+    elevation: 12,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   formTitle: {
     fontSize: 24,
@@ -479,70 +450,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748B',
     marginTop: 3,
-    marginBottom: 16,
+    marginBottom: 20,
   },
-
-  // Quick Logins
-  quickLoginsSection: {
-    marginBottom: 18,
-  },
-  quickLoginsLabel: {
-    fontSize: 11,
+  boldPhoneText: {
     fontWeight: '700',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
-    marginBottom: 8,
-  },
-  quickLoginsRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  quickLoginChip: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    gap: 5,
-  },
-  activeGuardChip: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
-  },
-  activeGuardChipText: {
-    color: '#2563EB',
-    fontWeight: '700',
-  },
-  activeSupervisorChip: {
-    backgroundColor: '#EEF2FF',
-    borderColor: '#C7D2FE',
-  },
-  activeSupervisorChipText: {
-    color: '#4F46E5',
-    fontWeight: '700',
-  },
-  quickLoginChipText: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#475569',
+    color: '#0F172A',
   },
 
   // Inputs
   inputsSection: {
-    gap: 14,
+    gap: 16,
   },
   fieldGroup: {
     gap: 6,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   fieldLabel: {
     fontSize: 13,
@@ -553,54 +473,26 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontWeight: '700',
   },
-  detectedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    gap: 4,
-  },
-  guardBadge: {
-    backgroundColor: '#EFF6FF',
-  },
-  guardBadgeText: {
-    color: '#2563EB',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  supervisorBadge: {
-    backgroundColor: '#EEF2FF',
-  },
-  supervisorBadgeText: {
-    color: '#4F46E5',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  detectedBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     borderRadius: 14,
-    height: 50,
+    height: 52,
     paddingHorizontal: 14,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      } as any,
+    }),
   },
   countryCodeBox: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
     paddingRight: 8,
-  },
-  countryCodeText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
   },
   inputDivider: {
     width: 1,
@@ -608,57 +500,142 @@ const styles = StyleSheet.create({
     backgroundColor: '#CBD5E1',
     marginRight: 10,
   },
-  inputIconBox: {
-    marginRight: 10,
-  },
   textInput: {
     flex: 1,
     height: '100%',
-    fontSize: 15,
+    fontSize: 16,
     color: '#0F172A',
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      } as any,
+    }),
   },
-  eyeButton: {
+
+  // OTP Verification View
+  otpHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 4,
+  },
+  backToPhoneBtn: {
     padding: 6,
+    marginTop: 2,
+    borderRadius: 8,
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
   },
+  otpInputWrapper: {
+    position: 'relative',
+    marginVertical: 4,
+  },
+  otpBoxesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  otpBox: {
+    flex: 1,
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      } as any,
+    }),
+  },
+  otpBoxCurrent: {
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF',
+  },
+  otpBoxFilled: {
+    borderColor: '#93C5FD',
+    backgroundColor: '#F8FAFC',
+  },
+  otpBoxDigit: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#0F172A',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  hiddenTextInput: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
+    fontSize: 24,
+  },
+  resendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  resendTimerText: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  timerBold: {
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  resendBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  resendBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2563EB',
+  },
+  changeNumberText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+
+  // Error Banner
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    gap: 6,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    gap: 8,
   },
   errorText: {
     color: '#DC2626',
     fontSize: 12,
-    fontWeight: '500',
-  },
-  forgotRow: {
-    alignSelf: 'flex-end',
-    marginTop: -2,
-  },
-  forgotText: {
-    fontSize: 12,
     fontWeight: '600',
-    color: '#2563EB',
+    flex: 1,
   },
 
-  // Login Button
-  loginButtonWrapper: {
+  // Primary Buttons
+  primaryBtnWrapper: {
     borderRadius: 14,
     overflow: 'hidden',
-    marginTop: 6,
+    marginTop: 4,
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.28,
     shadowRadius: 12,
     elevation: 6,
   },
-  loginButtonGradient: {
+  primaryBtnGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -666,38 +643,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 10,
   },
-  loginButtonText: {
+  primaryBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
   },
-  loginButtonArrow: {
+  primaryBtnIconBox: {
     width: 26,
     height: 26,
     borderRadius: 13,
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-
-  // Footer
-  footer: {
-    marginTop: 20,
-    alignItems: 'center',
-    gap: 4,
-  },
-  secureBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  secureBadgeText: {
-    fontSize: 11,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  footerCopy: {
-    fontSize: 11,
-    color: '#CBD5E1',
   },
 });

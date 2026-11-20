@@ -13,6 +13,8 @@ import {
   StatusBar,
   Platform
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { gradients } from '../theme/colors';
 import { 
   Shield, 
   KeyRound, 
@@ -469,8 +471,17 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
   const selectedResident = FLATS_MAP[selectedFlat] || { resident: 'Resident', phone: '' };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <LinearGradient
+      colors={gradients.lightBackground}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}
+    >
+      {/* Ambient Glassmorphism Glow Spheres */}
+      <View style={styles.ambientGlowTop} pointerEvents="none" />
+      <View style={styles.ambientGlowBottom} pointerEvents="none" />
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F0F6FF" />
 
       {/* =========================================================================
           CLASSIC CLEAR HEADER: ONLY BEE PROPERTY & RIGHT SIDE ICONS
@@ -487,7 +498,11 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
             </TouchableOpacity>
           )}
           <View style={styles.logoBadge}>
-            <Shield size={20} color="#2563EB" strokeWidth={1.75} />
+            <Image 
+              source={require('../assets/logo.jpg')} 
+              style={styles.logoImage} 
+              resizeMode="cover" 
+            />
           </View>
           <Text style={styles.headerTitle}>Bee Property</Text>
         </View>
@@ -535,118 +550,125 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
         >
           {/* Main OTP Input Card */}
           <View style={styles.otpMainCard}>
-            <View style={styles.otpHeaderBox}>
-              <View style={styles.keyIconBadge}>
-                <KeyRound size={22} color="#2563EB" strokeWidth={1.75} />
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.95)', 'rgba(246, 250, 255, 0.85)', 'rgba(238, 246, 255, 0.80)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cardGradientInner}
+            >
+              <View style={styles.otpHeaderBox}>
+                <View style={styles.keyIconBadge}>
+                  <KeyRound size={22} color="#2563EB" strokeWidth={2} />
+                </View>
+                <Text style={styles.otpHeading}>Enter 6-Digit OTP</Text>
+                <Text style={styles.otpSubtitle}>Resident invite pass from Bee Property app</Text>
               </View>
-              <Text style={styles.otpHeading}>Enter 6-Digit OTP</Text>
-              <Text style={styles.otpSubtitle}>Resident invite pass from Bee Property app</Text>
-            </View>
 
-            {/* 6 Digit Display Boxes */}
-            <View style={styles.otpBoxRow}>
-              {[0, 1, 2, 3, 4, 5].map(idx => (
-                <View 
-                  key={idx} 
-                  style={[
-                    styles.otpBoxCell,
-                    otpDigits.length === idx && styles.otpBoxCellActive,
-                    otpDigits.length > idx && styles.otpBoxCellFilled
-                  ]}
-                >
-                  <Text style={styles.otpBoxCellText}>
-                    {otpDigits[idx] ? otpDigits[idx] : ''}
-                  </Text>
-                </View>
-              ))}
-            </View>
+              {/* 6 Digit Display Boxes */}
+              <View style={styles.otpBoxRow}>
+                {[0, 1, 2, 3, 4, 5].map(idx => (
+                  <View 
+                    key={idx} 
+                    style={[
+                      styles.otpBoxCell,
+                      otpDigits.length === idx && styles.otpBoxCellActive,
+                      otpDigits.length > idx && styles.otpBoxCellFilled
+                    ]}
+                  >
+                    <Text style={styles.otpBoxCellText}>
+                      {otpDigits[idx] ? otpDigits[idx] : ''}
+                    </Text>
+                  </View>
+                ))}
+              </View>
 
-            {/* Small Scan Button & Submit Button Row */}
-            <View style={styles.otpActionControlsRow}>
-              {/* Small Scan Button */}
-              <TouchableOpacity 
-                style={styles.smallScanButton}
-                onPress={() => setScanModalOpen(true)}
-                activeOpacity={0.8}
-              >
-                <QrCode size={16} color="#2563EB" strokeWidth={1.75} />
-                <Text style={styles.smallScanButtonText}>Scan</Text>
-              </TouchableOpacity>
-
-              {/* Submit Button */}
-              <TouchableOpacity 
-                style={styles.submitOtpButton}
-                onPress={handleOtpSubmit}
-                activeOpacity={0.85}
-              >
-                <Check size={18} color="#FFFFFF" strokeWidth={2.4} />
-                <Text style={styles.submitOtpButtonText}>Submit</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Validated Pass Card (If verified) */}
-            {validatedPass && (
-              <View style={styles.verifiedPassCard}>
-                <View style={styles.verifiedPassHeader}>
-                  <CircleCheck size={20} color="#059669" strokeWidth={2} />
-                  <Text style={styles.verifiedPassTitle}>PRE-APPROVED PASS VERIFIED</Text>
-                </View>
-                <Text style={styles.verifiedPassFlat}>{validatedPass.flat}</Text>
-                <Text style={styles.verifiedPassResident}>Resident: {validatedPass.resident}</Text>
-                
+              {/* Small Scan Button & Submit Button Row */}
+              <View style={styles.otpActionControlsRow}>
+                {/* Small Scan Button */}
                 <TouchableOpacity 
-                  style={styles.allowVerifiedBtn}
-                  onPress={handleAllowOtpEntry}
+                  style={styles.smallScanButton}
+                  onPress={() => setScanModalOpen(true)}
+                  activeOpacity={0.8}
+                >
+                  <QrCode size={16} color="#2563EB" strokeWidth={2} />
+                  <Text style={styles.smallScanButtonText}>Scan</Text>
+                </TouchableOpacity>
+
+                {/* Submit Button */}
+                <TouchableOpacity 
+                  style={styles.submitOtpButton}
+                  onPress={handleOtpSubmit}
                   activeOpacity={0.85}
                 >
                   <Check size={18} color="#FFFFFF" strokeWidth={2.4} />
-                  <Text style={styles.allowVerifiedBtnText}>ALLOW ENTRY NOW</Text>
+                  <Text style={styles.submitOtpButtonText}>Submit</Text>
                 </TouchableOpacity>
               </View>
-            )}
 
-            {/* Direct Touch Keypad (Single-handed rapid touch for guards) */}
-            <View style={styles.dialpadGrid}>
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
+              {/* Validated Pass Card (If verified) */}
+              {validatedPass && (
+                <View style={styles.verifiedPassCard}>
+                  <View style={styles.verifiedPassHeader}>
+                    <CircleCheck size={20} color="#059669" strokeWidth={2} />
+                    <Text style={styles.verifiedPassTitle}>PRE-APPROVED PASS VERIFIED</Text>
+                  </View>
+                  <Text style={styles.verifiedPassFlat}>{validatedPass.flat}</Text>
+                  <Text style={styles.verifiedPassResident}>Resident: {validatedPass.resident}</Text>
+                  
+                  <TouchableOpacity 
+                    style={styles.allowVerifiedBtn}
+                    onPress={handleAllowOtpEntry}
+                    activeOpacity={0.85}
+                  >
+                    <Check size={18} color="#FFFFFF" strokeWidth={2.4} />
+                    <Text style={styles.allowVerifiedBtnText}>ALLOW ENTRY NOW</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Direct Touch Keypad (Single-handed rapid touch for guards) */}
+              <View style={styles.dialpadGrid}>
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
+                  <TouchableOpacity 
+                    key={num} 
+                    style={styles.dialKey} 
+                    onPress={() => handleKeypadPress(num)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.dialKeyText}>{num}</Text>
+                  </TouchableOpacity>
+                ))}
+                
+                {/* Demo Auto-fill Key */}
                 <TouchableOpacity 
-                  key={num} 
-                  style={styles.dialKey} 
-                  onPress={() => handleKeypadPress(num)}
+                  style={[styles.dialKey, styles.dialKeySpecial]} 
+                  onPress={() => {
+                    setOtpDigits('849210');
+                    triggerValidation('849210');
+                  }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.dialKeyText}>{num}</Text>
+                  <Text style={styles.dialKeySpecialText}>Demo</Text>
                 </TouchableOpacity>
-              ))}
-              
-              {/* Demo Auto-fill Key */}
-              <TouchableOpacity 
-                style={[styles.dialKey, styles.dialKeySpecial]} 
-                onPress={() => {
-                  setOtpDigits('849210');
-                  triggerValidation('849210');
-                }}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.dialKeySpecialText}>Demo</Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={styles.dialKey} 
-                onPress={() => handleKeypadPress('0')}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.dialKeyText}>0</Text>
-              </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.dialKey} 
+                  onPress={() => handleKeypadPress('0')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.dialKeyText}>0</Text>
+                </TouchableOpacity>
 
-              {/* Backspace Delete Key */}
-              <TouchableOpacity 
-                style={[styles.dialKey, styles.dialKeySpecial]} 
-                onPress={handleBackspace}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.dialKeyDeleteText}>⌫</Text>
-              </TouchableOpacity>
-            </View>
+                {/* Backspace Delete Key */}
+                <TouchableOpacity 
+                  style={[styles.dialKey, styles.dialKeyDelete]} 
+                  onPress={handleBackspace}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.dialKeyDeleteText}>⌫</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
           </View>
 
 
@@ -1333,6 +1355,22 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
                   </Text>
                 </TouchableOpacity>
 
+                {navigation?.navigate && (
+                  <TouchableOpacity
+                    style={[styles.modalDutyBtn, { backgroundColor: '#2563EB', marginTop: 10 }]}
+                    onPress={() => {
+                      setSupervisorModalOpen(false);
+                      navigation.navigate('SupervisorDashboard');
+                    }}
+                    activeOpacity={0.85}
+                  >
+                    <SlidersHorizontal size={15} color="#FFFFFF" strokeWidth={2} />
+                    <Text style={styles.modalDutyBtnText}>
+                      Open Supervisor Console (Table & Cards)
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
                 <Text style={styles.dutyNote}>All biometric barriers and boom gates operational.</Text>
               </View>
 
@@ -1437,27 +1475,35 @@ export const GuardDashboard: React.FC<{ navigation?: any }> = ({ navigation }) =
         </View>
       </Modal>
 
-    </SafeAreaView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 // =============================================================================
-// STYLES: CLEAN, MINIMAL & PROFESSIONAL BLUE & WHITE
+// STYLES: FROSTED GLASSMORPHISM UI SYSTEM (WHITE & BLUE)
 // =============================================================================
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
     paddingHorizontal: 16,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: 'rgba(255, 255, 255, 0.95)',
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(20px) saturate(175%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(175%)',
+        boxShadow: '0 4px 20px -4px rgba(37, 99, 235, 0.08)',
+      } as any,
+    }),
   },
   headerLeft: {
     flexDirection: 'row',
@@ -1469,19 +1515,25 @@ const styles = StyleSheet.create({
     marginRight: 2,
   },
   logoBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#EFF6FF',
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(239, 246, 255, 0.90)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: 'rgba(191, 219, 254, 0.85)',
+    overflow: 'hidden',
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
     letterSpacing: 0.2,
   },
   headerRight: {
@@ -1493,17 +1545,45 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      } as any,
+    }),
+  },
+
+  // Ambient Glow Spheres for Frosted Glass Depth
+  ambientGlowTop: {
+    position: 'absolute',
+    top: -40,
+    right: -30,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: 'rgba(59, 130, 246, 0.22)',
+    ...Platform.select({ web: { filter: 'blur(70px)', pointerEvents: 'none' } as any }),
+  },
+  ambientGlowBottom: {
+    position: 'absolute',
+    bottom: 100,
+    left: -40,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(37, 99, 235, 0.16)',
+    ...Platform.select({ web: { filter: 'blur(70px)', pointerEvents: 'none' } as any }),
   },
 
   // Main Scroll
   mainScrollView: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'transparent',
   },
 
   // ---------------------------------------------------------------------------
@@ -1511,66 +1591,116 @@ const styles = StyleSheet.create({
   // ---------------------------------------------------------------------------
   otpScreenContainer: {
     padding: 16,
-    paddingBottom: 90,
+    paddingBottom: 100,
   },
   otpMainCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.50)',
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    overflow: 'hidden',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.14,
+    shadowRadius: 36,
+    elevation: 8,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(28px) saturate(190%)',
+        WebkitBackdropFilter: 'blur(28px) saturate(190%)',
+        boxShadow: '0 20px 40px -10px rgba(37, 99, 235, 0.15), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(191, 219, 254, 0.35)',
+      } as any,
+    }),
+  },
+  cardGradientInner: {
+    padding: 22,
+    borderRadius: 24,
   },
   otpHeaderBox: {
     alignItems: 'center',
     marginBottom: 16,
   },
   keyIconBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#EFF6FF',
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.90)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.98)',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 3,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 4px 14px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1)',
+      } as any,
+    }),
   },
   otpHeading: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '800',
     color: '#0F172A',
+    letterSpacing: -0.3,
   },
   otpSubtitle: {
     fontSize: 12,
+    fontWeight: '500',
     color: '#64748B',
-    marginTop: 2,
+    marginTop: 3,
   },
   otpBoxRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     gap: 8,
-    marginVertical: 12,
+    marginVertical: 14,
   },
   otpBoxCell: {
-    width: 44,
-    height: 50,
-    borderRadius: 8,
+    flex: 1,
+    maxWidth: 48,
+    height: 54,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   otpBoxCellActive: {
     borderColor: '#2563EB',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.95)',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.22), 0 4px 14px rgba(37, 99, 235, 0.15)',
+      } as any,
+    }),
   },
   otpBoxCellFilled: {
-    borderColor: '#1D4ED8',
-    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(37, 99, 235, 0.50)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 14px rgba(37, 99, 235, 0.08), inset 0 1px 0 #FFFFFF',
+      } as any,
+    }),
   },
   otpBoxCellText: {
     fontSize: 22,
@@ -1583,25 +1713,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginTop: 6,
+    marginTop: 4,
     marginBottom: 16,
   },
   smallScanButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EFF6FF',
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    borderRadius: 14,
     gap: 6,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 4px 14px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1)',
+      } as any,
+    }),
   },
   smallScanButtonText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#1D4ED8',
+    color: '#2563EB',
   },
   submitOtpButton: {
     flex: 1,
@@ -1609,25 +1751,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#2563EB',
-    paddingVertical: 12,
-    borderRadius: 10,
-    gap: 6,
+    paddingVertical: 13,
+    borderRadius: 14,
+    gap: 7,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.32,
+    shadowRadius: 16,
+    elevation: 4,
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+        boxShadow: '0 6px 18px 0 rgba(37, 99, 235, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.30)',
+      } as any,
+    }),
   },
   submitOtpButtonText: {
     fontSize: 14,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 
   // Verified Pass Display
   verifiedPassCard: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(236, 253, 245, 0.85)',
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-    borderRadius: 12,
+    borderColor: 'rgba(167, 243, 208, 0.85)',
+    borderRadius: 16,
     padding: 14,
     marginBottom: 16,
     gap: 6,
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      } as any,
+    }),
   },
   verifiedPassHeader: {
     flexDirection: 'row',
@@ -1637,7 +1802,7 @@ const styles = StyleSheet.create({
   verifiedPassTitle: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#047857',
+    color: '#059669',
   },
   verifiedPassFlat: {
     fontSize: 13,
@@ -1646,17 +1811,22 @@ const styles = StyleSheet.create({
   },
   verifiedPassResident: {
     fontSize: 11,
-    color: '#047857',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   allowVerifiedBtn: {
     backgroundColor: '#059669',
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
     marginTop: 4,
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.20,
+    shadowRadius: 10,
+    elevation: 2,
   },
   allowVerifiedBtnText: {
     fontSize: 13,
@@ -1669,33 +1839,63 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   dialKey: {
-    width: '30%',
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
+    width: '31%',
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.98)',
+        cursor: 'pointer',
+      } as any,
+    }),
   },
   dialKeySpecial: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.85)',
+    borderColor: 'rgba(191, 219, 254, 0.85)',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 12px rgba(37, 99, 235, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
+  },
+  dialKeyDelete: {
+    backgroundColor: 'rgba(254, 242, 242, 0.85)',
+    borderColor: 'rgba(254, 202, 202, 0.85)',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   dialKeyText: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 21,
+    fontWeight: '800',
     color: '#0F172A',
   },
   dialKeySpecialText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#2563EB',
   },
   dialKeyDeleteText: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#DC2626',
+    fontWeight: '800',
+    color: '#EF4444',
   },
 
   // Transition Banner Button
@@ -1703,12 +1903,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderWidth: 1,
-    borderColor: '#BFDBFE',
-    borderRadius: 12,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
     padding: 14,
     marginTop: 14,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 6px 20px -4px rgba(37, 99, 235, 0.08)',
+      } as any,
+    }),
   },
   nextScreenBannerLeft: {
     flexDirection: 'row',
@@ -1718,11 +1930,11 @@ const styles = StyleSheet.create({
   nextScreenBannerTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
   },
   nextScreenBannerSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     marginTop: 2,
   },
 
@@ -1741,20 +1953,26 @@ const styles = StyleSheet.create({
   primaryVisitorCard: {
     flex: 1,
     backgroundColor: '#2563EB',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 14,
     alignItems: 'center',
     shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    elevation: 3,
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+        boxShadow: '0 8px 24px -4px rgba(37, 99, 235, 0.25)',
+      } as any,
+    }),
   },
   primaryVisitorIconWrap: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#1D4ED8',
+    backgroundColor: 'rgba(29, 78, 216, 0.60)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -1766,35 +1984,49 @@ const styles = StyleSheet.create({
   },
   primaryVisitorSub: {
     fontSize: 10,
-    color: '#BFDBFE',
+    color: 'rgba(255, 255, 255, 0.85)',
     marginTop: 2,
   },
   secondaryVehicleCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 16,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 8px 24px -4px rgba(37, 99, 235, 0.08)',
+      } as any,
+    }),
   },
   secondaryVehicleIconWrap: {
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#F0FDF4',
+    backgroundColor: 'rgba(240, 253, 244, 0.90)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(187, 247, 208, 0.80)',
   },
   secondaryVehicleTitle: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
   },
   secondaryVehicleSub: {
     fontSize: 10,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     marginTop: 2,
   },
 
@@ -1804,13 +2036,20 @@ const styles = StyleSheet.create({
   },
   queueTabsBar: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.60)',
+    borderRadius: 14,
     padding: 4,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.85)',
     gap: 6,
     marginBottom: 12,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(12px) saturate(175%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(175%)',
+        boxShadow: '0 4px 16px -2px rgba(37, 99, 235, 0.06)',
+      } as any,
+    }),
   },
   queueTab: {
     flex: 1,
@@ -1818,16 +2057,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
     gap: 6,
   },
   queueTabActive: {
     backgroundColor: '#2563EB',
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+        boxShadow: '0 4px 12px 0 rgba(37, 99, 235, 0.25)',
+      } as any,
+    }),
   },
   queueTabText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   queueTabTextActive: {
     color: '#FFFFFF',
@@ -1838,13 +2083,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   queueBadgePending: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
   },
   queueBadgeIn: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
   },
   queueBadgeOut: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
   },
   queueBadgeActive: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
@@ -1861,30 +2106,49 @@ const styles = StyleSheet.create({
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     marginBottom: 12,
     gap: 8,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 12px -2px rgba(37, 99, 235, 0.05)',
+      } as any,
+    }),
   },
   searchInput: {
     flex: 1,
     fontSize: 13,
-    color: '#0F172A',
+    color: '#000000',
     padding: 0,
   },
 
   // Entry Cards
   entryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 10,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    marginBottom: 12,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.11,
+    shadowRadius: 28,
+    elevation: 3,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: '0 10px 28px -8px rgba(37, 99, 235, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   entryCardTop: {
     flexDirection: 'row',
@@ -1895,10 +2159,12 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.90)',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(191, 219, 254, 0.80)',
   },
   avatarImg: {
     width: '100%',
@@ -1915,12 +2181,12 @@ const styles = StyleSheet.create({
   entryNameText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#000000',
   },
   companyBadge: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.90)',
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(191, 219, 254, 0.85)',
     paddingHorizontal: 6,
     paddingVertical: 1,
     borderRadius: 4,
@@ -1932,19 +2198,19 @@ const styles = StyleSheet.create({
   },
   entrySubTime: {
     fontSize: 11,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     marginTop: 2,
   },
 
   // Destination Box
   entryDestBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 8,
+    backgroundColor: 'rgba(240, 246, 255, 0.65)',
+    borderRadius: 10,
     padding: 8,
     marginTop: 8,
     gap: 4,
     borderWidth: 1,
-    borderColor: '#EDF2F7',
+    borderColor: 'rgba(219, 234, 254, 0.70)',
   },
   destRow: {
     flexDirection: 'row',
@@ -1954,7 +2220,7 @@ const styles = StyleSheet.create({
   destText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1E293B',
+    color: '#000000',
   },
   residentRow: {
     flexDirection: 'row',
@@ -1963,7 +2229,7 @@ const styles = StyleSheet.create({
   },
   residentText: {
     fontSize: 11,
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   plateRow: {
     flexDirection: 'row',
@@ -1973,7 +2239,7 @@ const styles = StyleSheet.create({
   plateText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#047857',
+    color: '#059669',
   },
 
   // Queue Actions
@@ -1981,10 +2247,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   positiveApprovalBox: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(236, 253, 245, 0.80)',
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-    borderRadius: 8,
+    borderColor: 'rgba(167, 243, 208, 0.80)',
+    borderRadius: 10,
     padding: 8,
     gap: 6,
   },
@@ -1996,16 +2262,26 @@ const styles = StyleSheet.create({
   approvalSuccessText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#047857',
+    color: '#059669',
   },
   allowEntryBtn: {
     backgroundColor: '#2563EB',
-    borderRadius: 8,
+    borderRadius: 10,
     paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.20,
+    shadowRadius: 8,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+      } as any,
+    }),
   },
   allowEntryBtnText: {
     fontSize: 12,
@@ -2016,10 +2292,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: 'rgba(255, 251, 235, 0.80)',
     borderWidth: 1,
-    borderColor: '#FDE68A',
-    borderRadius: 8,
+    borderColor: 'rgba(253, 230, 138, 0.80)',
+    borderRadius: 10,
     padding: 8,
   },
   waitingHeader: {
@@ -2031,20 +2307,20 @@ const styles = StyleSheet.create({
   waitingText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#B45309',
+    color: '#D97706',
   },
   manualAllowBtn: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.80)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     paddingHorizontal: 8,
     paddingVertical: 5,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   manualAllowBtnText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#000000',
   },
 
   // IN Queue Actions
@@ -2063,28 +2339,28 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#10B981',
+    backgroundColor: '#059669',
   },
   inStatusText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#047857',
+    color: '#059669',
   },
   markOutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(254, 242, 242, 0.85)',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: 'rgba(254, 202, 202, 0.85)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
     gap: 4,
   },
   markOutBtnText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#DC2626',
+    color: '#E11D48',
   },
 
   // OUT Queue Actions
@@ -2096,38 +2372,46 @@ const styles = StyleSheet.create({
   },
   outHistoryText: {
     fontSize: 11,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
   outPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 6,
   },
   outPillText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
 
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 36,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     gap: 4,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      } as any,
+    }),
   },
   emptyStateTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#475569',
+    color: '#000000',
   },
   emptyStateSub: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
 
   // ---------------------------------------------------------------------------
@@ -2135,37 +2419,53 @@ const styles = StyleSheet.create({
   // ---------------------------------------------------------------------------
   bottomTabBar: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    bottom: 14,
+    left: 16,
+    right: 16,
+    height: 62,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingBottom: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 4,
+    paddingHorizontal: 8,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 28,
+    elevation: 8,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(24px) saturate(190%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+        boxShadow: '0 12px 32px -4px rgba(37, 99, 235, 0.14), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(191, 219, 254, 0.40)',
+      } as any,
+    }),
   },
   bottomTabItem: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
-    gap: 2,
+    paddingVertical: 10,
+    borderRadius: 16,
+    gap: 8,
   },
   bottomTabItemActive: {
-    borderTopWidth: 2,
-    borderTopColor: '#2563EB',
+    backgroundColor: 'rgba(239, 246, 255, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(191, 219, 254, 0.85)',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   bottomTabLabel: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#64748B',
   },
   bottomTabLabelActive: {
@@ -2175,19 +2475,33 @@ const styles = StyleSheet.create({
 
   // Scanner Modal
   scannerCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderRadius: 20,
     marginHorizontal: 20,
-    padding: 16,
+    padding: 20,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 28,
+    elevation: 10,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: '0 16px 36px -8px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   scannerViewfinder: {
     width: 200,
     height: 180,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 2,
     borderColor: '#2563EB',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(240, 246, 255, 0.50)',
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 16,
@@ -2196,16 +2510,26 @@ const styles = StyleSheet.create({
   scannerPrompt: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
   scanSimulateBtn: {
     backgroundColor: '#2563EB',
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 3,
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+      } as any,
+    }),
   },
   scanSimulateBtnText: {
     fontSize: 13,
@@ -2216,15 +2540,35 @@ const styles = StyleSheet.create({
   // Modal Sheet & Overlay
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    backgroundColor: 'rgba(9, 13, 22, 0.40)',
     justifyContent: 'flex-end',
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+      } as any,
+    }),
   },
   modalSheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     maxHeight: '88%',
     paddingBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 16,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: '0 -8px 32px -4px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95)',
+      } as any,
+    }),
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -2233,7 +2577,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: 'rgba(255, 255, 255, 0.90)',
   },
   sheetHeaderTitleGroup: {
     flex: 1,
@@ -2241,11 +2585,11 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
   },
   sheetSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     marginTop: 2,
   },
   closeBtn: {
@@ -2257,8 +2601,10 @@ const styles = StyleSheet.create({
 
   typeSwitcher: {
     flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.60)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 12,
     padding: 4,
     marginBottom: 14,
     gap: 4,
@@ -2269,16 +2615,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    borderRadius: 6,
+    borderRadius: 8,
     gap: 6,
   },
   typeSwitchBtnActive: {
     backgroundColor: '#2563EB',
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+        boxShadow: '0 4px 10px rgba(37, 99, 235, 0.25)',
+      } as any,
+    }),
   },
   typeSwitchText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   typeSwitchTextActive: {
     color: '#FFFFFF',
@@ -2290,19 +2642,25 @@ const styles = StyleSheet.create({
   formLabel: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   formInput: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 8,
+    borderColor: 'rgba(255, 255, 255, 0.90)',
+    borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 9,
     fontSize: 13,
-    color: '#0F172A',
+    color: '#000000',
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      } as any,
+    }),
   },
   plateInput: {
     fontWeight: '800',
@@ -2325,6 +2683,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
     marginRight: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
   },
   companyChipSelected: {
     borderWidth: 1.8,
@@ -2342,12 +2701,12 @@ const styles = StyleSheet.create({
   cameraBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.85)',
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(191, 219, 254, 0.85)',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
     gap: 6,
   },
   cameraBtnText: {
@@ -2365,7 +2724,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#10B981',
+    borderColor: '#059669',
   },
   photoCapturedLabel: {
     fontSize: 11,
@@ -2374,17 +2733,28 @@ const styles = StyleSheet.create({
   },
   photoOptionalNote: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
 
   hierarchyCard: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(248, 251, 255, 0.75)',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 16,
     padding: 12,
     marginBottom: 16,
     gap: 10,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      } as any,
+    }),
   },
   hierarchyTitleRow: {
     flexDirection: 'row',
@@ -2395,7 +2765,7 @@ const styles = StyleSheet.create({
   hierarchyTitle: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#1E3A8A',
+    color: '#1D4ED8',
     letterSpacing: 0.5,
   },
   hierarchyStep: {
@@ -2404,15 +2774,15 @@ const styles = StyleSheet.create({
   stepLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   fixedAptBox: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.90)',
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(191, 219, 254, 0.85)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   fixedAptText: {
     fontSize: 12,
@@ -2425,12 +2795,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   pillBtn: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
     marginRight: 6,
   },
   pillBtnActive: {
@@ -2440,7 +2810,7 @@ const styles = StyleSheet.create({
   pillBtnText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#334155',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   pillBtnTextActive: {
     color: '#FFFFFF',
@@ -2452,12 +2822,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   flatPill: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 8,
     marginRight: 6,
   },
   horizontalScrollContent: {
@@ -2472,17 +2842,17 @@ const styles = StyleSheet.create({
   flatPillText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#334155',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   flatPillTextActive: {
     color: '#FFFFFF',
     fontWeight: '700',
   },
   linkedResidentBox: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(236, 253, 245, 0.85)',
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-    borderRadius: 8,
+    borderColor: 'rgba(167, 243, 208, 0.85)',
+    borderRadius: 10,
     padding: 8,
     marginTop: 4,
   },
@@ -2494,7 +2864,7 @@ const styles = StyleSheet.create({
   linkedResidentTitle: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#047857',
+    color: '#059669',
   },
   linkedResidentName: {
     fontSize: 12,
@@ -2504,17 +2874,27 @@ const styles = StyleSheet.create({
   },
   linkedResidentPhone: {
     fontSize: 10,
-    color: '#047857',
+    color: '#059669',
   },
 
   submitReqBtn: {
     backgroundColor: '#2563EB',
-    borderRadius: 10,
+    borderRadius: 12,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 3,
+    ...Platform.select({
+      web: {
+        backgroundImage: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+      } as any,
+    }),
   },
   submitReqBtnText: {
     fontSize: 13,
@@ -2528,18 +2908,21 @@ const styles = StyleSheet.create({
   },
   vehTypeBtn: {
     flex: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     paddingVertical: 8,
-    borderRadius: 6,
+    borderRadius: 8,
     alignItems: 'center',
   },
   vehTypeBtnActive: {
     backgroundColor: '#2563EB',
+    borderColor: '#1D4ED8',
   },
   vehTypeBtnText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
   vehTypeBtnTextActive: {
     color: '#FFFFFF',
@@ -2553,59 +2936,82 @@ const styles = StyleSheet.create({
   },
   superStatCard: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 8,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 12,
     padding: 10,
     alignItems: 'center',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 2,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+      } as any,
+    }),
   },
   superStatValue: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
   },
   superStatLabel: {
     fontSize: 10,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     marginTop: 2,
     textAlign: 'center',
   },
   supervisorDutyCard: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(239, 246, 255, 0.88)',
     borderWidth: 1,
-    borderColor: '#BFDBFE',
-    borderRadius: 8,
+    borderColor: 'rgba(191, 219, 254, 0.80)',
+    borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     gap: 4,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+      } as any,
+    }),
   },
   dutyTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#1E3A8A',
+    color: '#1D4ED8',
   },
   dutyGuard: {
     fontSize: 11,
-    color: '#1D4ED8',
+    color: '#2563EB',
   },
   dutyNote: {
     fontSize: 10,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
   logoutHeaderBtn: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
+    backgroundColor: 'rgba(254, 242, 242, 0.80)',
+    borderColor: 'rgba(254, 202, 202, 0.80)',
   },
   dutyBar: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.60)',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: 'rgba(255, 255, 255, 0.85)',
     paddingHorizontal: 16,
     paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(12px) saturate(175%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(175%)',
+      } as any,
+    }),
   },
   dutyBarLeft: {
     flexDirection: 'row',
@@ -2618,18 +3024,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 8,
     gap: 5,
   },
   dutyStatusPillActive: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(236, 253, 245, 0.85)',
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: 'rgba(167, 243, 208, 0.85)',
   },
   dutyStatusPillInactive: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.90)',
   },
   dutyDot: {
     width: 6,
@@ -2637,7 +3043,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   dutyDotActive: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#059669',
   },
   dutyDotInactive: {
     backgroundColor: '#94A3B8',
@@ -2651,7 +3057,7 @@ const styles = StyleSheet.create({
     color: '#059669',
   },
   dutyStatusTextInactive: {
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
   dutyTimerBox: {
     flexDirection: 'row',
@@ -2660,13 +3066,13 @@ const styles = StyleSheet.create({
   },
   dutyTimerLabel: {
     fontSize: 11,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     fontWeight: '500',
   },
   dutyTimerVal: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#1E3A8A',
+    color: '#1D4ED8',
   },
   dutyToggleActionBtn: {
     flexDirection: 'row',
@@ -2677,7 +3083,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   dutyLogoutActionBtn: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#E11D48',
   },
   dutyLoginActionBtn: {
     backgroundColor: '#059669',
@@ -2695,31 +3101,31 @@ const styles = StyleSheet.create({
   dutyBadgeModal: {
     paddingHorizontal: 7,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 6,
   },
   dutyBadgeActive: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: 'rgba(220, 252, 231, 0.85)',
   },
   dutyBadgeInactive: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
   },
   dutyBadgeModalText: {
     fontSize: 10,
     fontWeight: '700',
   },
   dutyBadgeActiveText: {
-    color: '#15803D',
+    color: '#059669',
   },
   dutyBadgeInactiveText: {
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
   modalShiftDurationCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 10,
     padding: 8,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
   },
   modalShiftDurationRow: {
     flexDirection: 'row',
@@ -2728,7 +3134,7 @@ const styles = StyleSheet.create({
   },
   modalShiftDurationLabel: {
     fontSize: 11,
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
     fontWeight: '600',
   },
   modalShiftDurationVal: {
@@ -2738,7 +3144,7 @@ const styles = StyleSheet.create({
   },
   modalShiftStartTimeNote: {
     fontSize: 10,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     marginTop: 2,
   },
   modalDutyBtn: {
@@ -2746,12 +3152,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
-    borderRadius: 6,
+    borderRadius: 8,
     marginTop: 8,
     gap: 6,
   },
   modalDutyLogoutBtn: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#E11D48',
   },
   modalDutyLoginBtn: {
     backgroundColor: '#059669',
@@ -2762,7 +3168,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   logoutModalCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderBottomLeftRadius: 0,
@@ -2772,17 +3178,25 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 38 : 28,
     width: '100%',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
     elevation: 20,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+      } as any,
+    }),
   },
   logoutHandle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
     marginBottom: 16,
     alignSelf: 'center',
   },
@@ -2790,7 +3204,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#FEE2E2',
+    backgroundColor: 'rgba(254, 226, 226, 0.85)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -2798,22 +3212,22 @@ const styles = StyleSheet.create({
   logoutModalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
   },
   logoutModalSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 16,
   },
   logoutSummaryCard: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: 'rgba(248, 251, 255, 0.80)',
+    borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.95)',
     gap: 8,
     marginBottom: 18,
   },
@@ -2824,20 +3238,20 @@ const styles = StyleSheet.create({
   },
   logoutSummaryLabel: {
     fontSize: 12,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     fontWeight: '600',
   },
   logoutSummaryVal: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#000000',
   },
   logoutBtnGroup: {
     width: '100%',
     gap: 8,
   },
   logoutConfirmBtn: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#E11D48',
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -2848,45 +3262,62 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   logoutCancelBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.90)',
     borderRadius: 12,
     paddingVertical: 11,
     alignItems: 'center',
   },
   logoutCancelBtnText: {
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
     fontSize: 13,
     fontWeight: '600',
   },
   closeSheetBtn: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.90)',
+    borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
   },
   closeSheetBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#475569',
+    color: 'rgba(0, 0, 0, 0.75)',
   },
 
   sosCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
     marginHorizontal: 24,
     padding: 24,
     alignItems: 'center',
     gap: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 63, 94, 0.25)',
+    shadowColor: '#E11D48',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      } as any,
+    }),
   },
   sosTitle: {
     fontSize: 18,
     fontWeight: '900',
-    color: '#DC2626',
+    color: '#E11D48',
     letterSpacing: 0.5,
   },
   sosSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
     textAlign: 'center',
     marginBottom: 10,
   },
@@ -2895,8 +3326,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sosConfirmBtn: {
-    backgroundColor: '#DC2626',
-    borderRadius: 8,
+    backgroundColor: '#E11D48',
+    borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
   },
@@ -2907,14 +3338,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   sosCancelBtn: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.70)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.90)',
+    borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
   },
   sosCancelBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#64748B',
+    color: 'rgba(0, 0, 0, 0.50)',
   },
 });

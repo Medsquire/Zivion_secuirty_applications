@@ -4,10 +4,57 @@
 
 @layer base {
   body {
-    @apply bg-page text-text m-0;
+    background: linear-gradient(135deg, #F0F6FF 0%, #E9F2FE 40%, #F5F9FF 100%);
+    background-attachment: fixed;
+    color: #000000;
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+    margin: 0;
   }
 }
 
 #root {
   @apply min-h-screen w-full flex flex-col overflow-x-hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Frosted Glassmorphism Tokens (White & Blue)                                */
+/* -------------------------------------------------------------------------- */
+
+.glass-stat-white {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 251, 255, 0.78) 55%, rgba(239, 246, 255, 0.74) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 28px -8px rgba(37, 99, 235, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+}
+
+.glass-dock {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(226, 240, 255, 0.18) 50%, rgba(255, 255, 255, 0.26) 100%);
+  backdrop-filter: blur(8px) saturate(175%);
+  -webkit-backdrop-filter: blur(8px) saturate(175%);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.glass-stat-blue {
+  background: linear-gradient(145deg, rgba(239, 246, 255, 0.92) 0%, rgba(224, 237, 254, 0.78) 55%, rgba(255, 255, 255, 0.84) 100%);
+  border: 1px solid rgba(191, 219, 254, 0.75);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.glass-input:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.20);
+}
+
+.btn-glass-primary {
+  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.25);
+  border-radius: 12px;
 }

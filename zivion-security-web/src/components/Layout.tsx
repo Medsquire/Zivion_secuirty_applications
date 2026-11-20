@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Building2, 
-  Menu, 
-  X, 
-  LayoutDashboard, 
-  Users, 
-  CarFront, 
-  AlertTriangle, 
-  LogOut, 
-  Bell, 
+import {
+  Building2,
+  Menu,
+  X,
+  LayoutDashboard,
+  Users,
+  CarFront,
+  AlertTriangle,
+  LogOut,
+  Bell,
   Search,
   Plus,
   QrCode,
   Package,
   PhoneCall,
   ShieldAlert,
+  ShieldCheck,
   ChevronRight
 } from 'lucide-react';
 
@@ -35,6 +36,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Visitors', path: '/dashboard/visitors', icon: Users },
     { name: 'Vehicles', path: '/dashboard/vehicles', icon: CarFront },
+    { name: 'Supervisor', path: '/dashboard/supervisor', icon: ShieldCheck },
   ];
 
   const handleSosTrigger = () => {
@@ -47,10 +49,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-page flex font-sans antialiased text-text selection:bg-electric/20 selection:text-electric">
-      
+
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-navy/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
@@ -60,15 +62,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-navy text-white transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between px-6 h-20 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-primary p-2.5 rounded-xl shadow-md">
-              <Building2 size={22} className="text-white" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shrink-0 border border-white/20 bg-white">
+              <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-wide leading-none text-white">BEE Security</span>
+              <span className="text-xl font-bold tracking-wide leading-none text-white">Bee Property</span>
               <span className="text-[10px] font-medium text-cyan mt-1 tracking-wider uppercase">Guard Console</span>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1.5 text-white/60 hover:text-white rounded-lg"
           >
@@ -102,11 +104,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   navigate(item.path);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${
-                  isActive 
-                    ? 'bg-electric text-white shadow-lg shadow-electric/25' 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive
+                    ? 'bg-electric text-white shadow-lg shadow-electric/25'
                     : 'text-white/70 hover:bg-white/5 hover:text-white'
-                }`}
+                  }`}
               >
                 <item.icon size={20} className={isActive ? 'text-white' : 'text-white/60'} />
                 <span>{item.name}</span>
@@ -127,7 +128,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </nav>
 
         <div className="p-4 border-t border-white/10 shrink-0">
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-all text-sm font-medium"
           >
@@ -139,11 +140,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-hidden">
-        
+
         {/* Clear Classic Header: Only Bee Property & Right Side Icons */}
-        <header className="sticky top-0 z-30 h-16 bg-white border-b border-border px-4 md:px-8 flex items-center justify-between shrink-0 shadow-xs">
+        <header className="sticky top-0 z-30 h-16 glass-dock px-4 md:px-8 flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               className="lg:hidden text-navy hover:bg-slate-100 p-2 rounded-xl border border-border"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
@@ -153,8 +154,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Clear Brand: Just Bee Property */}
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-xs">
-                <ShieldAlert size={20} className="stroke-[1.75]" />
+              <div className="w-9 h-9 rounded-xl border border-blue-200 flex items-center justify-center shadow-xs overflow-hidden bg-white">
+                <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-lg md:text-xl font-black text-navy tracking-tight">Bee Property</span>
             </div>
@@ -195,16 +196,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
          ========================================================================= */}
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
         {/* Soft blur backdrop container */}
-        <nav className="bg-white/95 backdrop-blur-md border-t border-border px-3 py-1.5 shadow-[0_-8px_25px_rgba(0,0,0,0.06)] flex items-center justify-around relative">
-          
+        <nav className="glass-dock px-3 py-1.5 shadow-[0_-8px_25px_rgba(37,99,235,0.06)] flex items-center justify-around relative">
+
           {/* Tab 1: Dashboard */}
           <button
             onClick={() => navigate('/dashboard')}
-            className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all ${
-              location.pathname === '/dashboard'
+            className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all ${location.pathname === '/dashboard'
                 ? 'text-electric font-semibold'
                 : 'text-secondary hover:text-navy'
-            }`}
+              }`}
           >
             <div className={`p-1 rounded-xl transition-all ${location.pathname === '/dashboard' ? 'bg-electric/10 scale-105' : ''}`}>
               <LayoutDashboard size={20} />
@@ -215,11 +215,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Tab 2: Visitors */}
           <button
             onClick={() => navigate('/dashboard/visitors')}
-            className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all ${
-              location.pathname.startsWith('/dashboard/visitors')
+            className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all ${location.pathname.startsWith('/dashboard/visitors')
                 ? 'text-electric font-semibold'
                 : 'text-secondary hover:text-navy'
-            }`}
+              }`}
           >
             <div className={`p-1 rounded-xl relative transition-all ${location.pathname.startsWith('/dashboard/visitors') ? 'bg-electric/10 scale-105' : ''}`}>
               <Users size={20} />
@@ -243,11 +242,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Tab 3: Vehicles */}
           <button
             onClick={() => navigate('/dashboard/vehicles')}
-            className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all ${
-              location.pathname.startsWith('/dashboard/vehicles')
+            className={`flex flex-col items-center justify-center min-w-[56px] py-1 transition-all ${location.pathname.startsWith('/dashboard/vehicles')
                 ? 'text-electric font-semibold'
                 : 'text-secondary hover:text-navy'
-            }`}
+              }`}
           >
             <div className={`p-1 rounded-xl transition-all ${location.pathname.startsWith('/dashboard/vehicles') ? 'bg-electric/10 scale-105' : ''}`}>
               <CarFront size={20} />
@@ -274,7 +272,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       {quickActionOpen && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end lg:hidden">
           {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 bg-navy/60 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setQuickActionOpen(false)}
           />
@@ -289,7 +287,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <h3 className="text-lg font-bold text-navy">Instant Gate Action</h3>
                 <p className="text-xs text-secondary">Tap any action for rapid check-in</p>
               </div>
-              <button 
+              <button
                 onClick={() => setQuickActionOpen(false)}
                 className="p-2 text-secondary hover:text-navy rounded-full hover:bg-gray-100"
               >
@@ -378,7 +376,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
          ========================================================================= */}
       {sosModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
+          <div
             className="fixed inset-0 bg-navy/70 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => !sosTriggered && setSosModalOpen(false)}
           />

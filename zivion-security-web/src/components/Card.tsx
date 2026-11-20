@@ -4,12 +4,14 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  active?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', onClick }) => {
+export const Card: React.FC<CardProps> = ({ children, className = '', onClick, active = false }) => {
+  const baseGlass = active ? 'glass-stat-blue' : 'glass-stat-white';
   return (
     <div 
-      className={`bg-card rounded-[16px] border border-border shadow-soft p-5 ${className}`}
+      className={`${baseGlass} p-5 ${className}`}
       onClick={onClick}
     >
       {children}

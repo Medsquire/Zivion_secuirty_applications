@@ -6,7 +6,8 @@ import {
   ScrollView, 
   SafeAreaView, 
   TouchableOpacity,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../theme/colors';
@@ -16,7 +17,6 @@ import {
   Users, 
   ClipboardList, 
   Settings, 
-  Building2, 
   ArrowLeft, 
   LogOut,
   Car,
@@ -44,7 +44,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigation }) =>
             </TouchableOpacity>
           )}
           <View style={styles.logoBadge}>
-            <Building2 size={18} color={colors.cyanBlue} />
+            <Image 
+              source={require('../assets/logo.jpg')} 
+              style={styles.logoImage} 
+              resizeMode="cover" 
+            />
           </View>
           <View>
             <Text style={styles.brandTitle}>ZIVION</Text>
@@ -242,10 +246,18 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: colors.primaryNavy,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9,
   },
   brandTitle: {
     fontSize: 16,
