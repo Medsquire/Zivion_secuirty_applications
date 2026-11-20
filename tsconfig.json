@@ -4,7 +4,7 @@
     "strict": true
   },
   "exclude": [
-    "zivion-security-web",
+    "dist",
     "node_modules"
   ]
 }
